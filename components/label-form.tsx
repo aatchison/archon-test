@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState } from "react";
 import { ColorPicker, COLORS } from "./color-picker";
 import { createLabel, updateLabel } from "@/actions/labels";
 

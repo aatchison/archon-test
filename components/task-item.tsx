@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { toggleDone, deleteTask } from "@/actions/tasks";
 import { TaskEditForm } from "@/components/task-edit-form";
 import { LabelBadge } from "@/components/label-badge";
@@ -74,7 +74,7 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
           />
           <button
             type="button"
-            className={`cursor-pointer text-left bg-transparent border-none p-0 focus:outline-none ${task.done ? "line-through text-gray-500" : ""}`}
+            className={`cursor-pointer text-left bg-transparent border-none p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${task.done ? "line-through text-gray-500" : ""}`}
             onClick={() => setIsEditing(true)}
           >
             {task.title}
@@ -116,7 +116,9 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
           <TaskEditForm
             task={{
               ...task,
-              dueDate: task.dueDate ? String(task.dueDate) : null,
+              dueDate: task.dueDate
+                ? new Date(task.dueDate).toISOString().split("T")[0]
+                : null,
               labels: task.labels.map((l) => ({ labelId: l.id })),
             }}
             allLabels={allLabels}

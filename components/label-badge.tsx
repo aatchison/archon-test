@@ -1,5 +1,3 @@
-import React from "react";
-
 interface LabelBadgeProps {
   name: string;
   color: string;
@@ -17,7 +15,7 @@ export function LabelBadge({ name, color, onRemove }: LabelBadgeProps) {
         <button
           type="button"
           onClick={onRemove}
-          className="ml-1 hover:text-gray-200 focus:outline-none"
+          className="ml-1 hover:text-gray-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded"
           aria-label={`Remove ${name}`}
         >
           ×

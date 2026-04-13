@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { updateTask } from "@/actions/tasks";
 import { addLabelToTask, removeLabelFromTask } from "@/actions/labels";
 import { LabelPicker } from "@/components/label-picker";

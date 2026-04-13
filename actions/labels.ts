@@ -14,7 +14,7 @@ async function getSession() {
 
 export async function createLabel(data: { name: string; color: string }) {
   const session = await getSession();
-  if (!data.name) throw new Error("Name is required");
+  if (!data.name?.trim()) throw new Error("Name is required");
 
   await db.label.create({
     data: {
@@ -38,7 +38,7 @@ export async function updateLabel(
     throw new Error("Unauthorized");
   }
 
-  if (data.name !== undefined && !data.name) {
+  if (data.name !== undefined && !data.name?.trim()) {
     throw new Error("Name cannot be empty");
   }
 

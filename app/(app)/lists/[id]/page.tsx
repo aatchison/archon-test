@@ -61,7 +61,6 @@ export default async function ListPage({
         </Link>
       </div>
       <TaskFilters
-        labels={allLabels}
         currentFilters={{
           priority,
           label: Array.isArray(label) ? label : label ? [label] : undefined,

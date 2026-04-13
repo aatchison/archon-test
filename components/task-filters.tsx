@@ -2,12 +2,6 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-interface Label {
-  id: string;
-  name: string;
-  color: string;
-}
-
 interface CurrentFilters {
   priority?: string;
   label?: string[];
@@ -16,11 +10,10 @@ interface CurrentFilters {
 }
 
 interface TaskFiltersProps {
-  labels: Label[];
   currentFilters: CurrentFilters;
 }
 
-export function TaskFilters({ labels, currentFilters }: TaskFiltersProps) {
+export function TaskFilters({ currentFilters }: TaskFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -38,7 +31,7 @@ export function TaskFilters({ labels, currentFilters }: TaskFiltersProps) {
     router.replace("?");
   };
 
-  const hasActiveFilters = Object.keys(currentFilters).length > 0;
+  const hasActiveFilters = Object.values(currentFilters).some(Boolean);
 
   return (
     <div className="flex flex-wrap items-center gap-4 p-4 bg-gray-100 rounded-lg">
@@ -70,9 +63,9 @@ export function TaskFilters({ labels, currentFilters }: TaskFiltersProps) {
           className="border rounded p-1"
         >
           <option value="Any">Any</option>
-          <option value="Overdue">Overdue</option>
-          <option value="Today">Due today</option>
-          <option value="Week">Due this week</option>
+          <option value="overdue">Overdue</option>
+          <option value="today">Due today</option>
+          <option value="week">Due this week</option>
         </select>
       </div>
 
@@ -87,8 +80,8 @@ export function TaskFilters({ labels, currentFilters }: TaskFiltersProps) {
           className="border rounded p-1"
         >
           <option value="All">All</option>
-          <option value="Active">Active</option>
-          <option value="Completed">Completed</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
         </select>
       </div>
 

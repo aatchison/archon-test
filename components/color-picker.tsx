@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 export const COLORS = [
   { name: "Red", hex: "#ef4444" },
   { name: "Orange", hex: "#f97316" },
