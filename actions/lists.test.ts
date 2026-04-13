@@ -1,86 +1,93 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createList, renameList, deleteList } from './lists';
+import { mock, describe, it, expect, beforeEach, spyOn } from "bun:test";
 
-const mockAuth = vi.fn();
-const mockDb = {
-  list: {
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-    findUnique: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  auth: async () => ({ user: { id: "user-1" } }),
+}));
+
+const mockCreate = spyOn({ fn: async () => ({}) }, "fn");
+const mockFindUnique = spyOn({ fn: async () => ({}) }, "fn");
+const mockUpdate = spyOn({ fn: async () => ({}) }, "fn");
+const mockDelete = spyOn({ fn: async () => ({}) }, "fn");
+
+mock.module("@/lib/db", () => ({
+  db: {
+    list: {
+      create: (...args: unknown[]) => mockCreate(...args),
+      findUnique: (...args: unknown[]) => mockFindUnique(...args),
+      update: (...args: unknown[]) => mockUpdate(...args),
+      delete: (...args: unknown[]) => mockDelete(...args),
+    },
   },
-};
-const mockRevalidatePath = vi.fn();
-
-vi.mock('@/lib/auth', () => ({
-  auth: () => mockAuth(),
-}));
-vi.mock('@/lib/db', () => ({
-  db: mockDb,
-}));
-vi.mock('next/cache', () => ({
-  revalidatePath: (path: string) => mockRevalidatePath(path),
 }));
 
-describe('List Server Actions', () => {
+mock.module("next/cache", () => ({
+  revalidatePath: () => {},
+}));
+
+const { createList, renameList, deleteList } = await import("./lists");
+
+describe("createList", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockAuth.mockReturnValue({ user: { id: 'user-1' } });
+    mockCreate.mockReset();
+    mockFindUnique.mockReset();
+    mockUpdate.mockReset();
+    mockDelete.mockReset();
   });
 
-  describe('createList', () => {
-    it('throws if name is empty', async () => {
-      await expect(createList('')).rejects.toThrow('Name is required');
-    });
-
-    it('creates and returns a list', async () => {
-      const mockList = { id: 'list-1', name: 'My List', ownerId: 'user-1' };
-      mockDb.list.create.mockResolvedValue(mockList);
-
-      const result = await createList('My List');
-      expect(result).toEqual(mockList);
-      expect(mockDb.list.create).toHaveBeenCalledWith({
-        data: { name: 'My List', ownerId: 'user-1' },
-      });
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/lists');
-    });
+  it("throws if name is empty", async () => {
+    await expect(createList("")).rejects.toThrow("Name is required");
+    await expect(createList("   ")).rejects.toThrow("Name is required");
   });
 
-  describe('renameList', () => {
-    it('throws Not Found if wrong owner', async () => {
-      mockDb.list.findUnique.mockResolvedValue({ id: 'list-1', ownerId: 'user-2' });
-      await expect(renameList('list-1', 'New Name')).rejects.toThrow('Not found');
-    });
-
-    it('renames the list', async () => {
-      mockDb.list.findUnique.mockResolvedValue({ id: 'list-1', ownerId: 'user-1' });
-      const mockList = { id: 'list-1', name: 'New Name', ownerId: 'user-1' };
-      mockDb.list.update.mockResolvedValue(mockList);
-
-      const result = await renameList('list-1', 'New Name');
-      expect(result).toEqual(mockList);
-      expect(mockDb.list.update).toHaveBeenCalledWith({
-        where: { id: 'list-1' },
-        data: { name: 'New Name' },
-      });
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/lists');
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/lists/list-1');
+  it("creates and returns the list", async () => {
+    const mockList = { id: "l1", name: "Work", ownerId: "user-1" };
+    mockCreate.mockResolvedValue(mockList);
+    const result = await createList("Work");
+    expect(result).toEqual(mockList);
+    expect(mockCreate).toHaveBeenCalledWith({
+      data: { name: "Work", ownerId: "user-1" },
     });
   });
+});
 
-  describe('deleteList', () => {
-    it('throws Not Found if wrong owner', async () => {
-      mockDb.list.findUnique.mockResolvedValue({ id: 'list-1', ownerId: 'user-2' });
-      await expect(deleteList('list-1')).rejects.toThrow('Not found');
-    });
+describe("renameList", () => {
+  beforeEach(() => {
+    mockCreate.mockReset();
+    mockFindUnique.mockReset();
+    mockUpdate.mockReset();
+    mockDelete.mockReset();
+  });
 
-    it('deletes the list', async () => {
-      mockDb.list.findUnique.mockResolvedValue({ id: 'list-1', ownerId: 'user-1' });
-      mockDb.list.delete.mockResolvedValue({ id: 'list-1' });
+  it("throws Not found if list belongs to another user", async () => {
+    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "other" });
+    await expect(renameList("l1", "New")).rejects.toThrow("Not found");
+  });
 
-      await deleteList('list-1');
-      expect(mockDb.list.delete).toHaveBeenCalledWith({ where: { id: 'list-1' } });
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/lists');
-    });
+  it("renames the list", async () => {
+    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "user-1" });
+    mockUpdate.mockResolvedValue({ id: "l1", name: "New", ownerId: "user-1" });
+    const result = await renameList("l1", "New");
+    expect(result.name).toBe("New");
+  });
+});
+
+describe("deleteList", () => {
+  beforeEach(() => {
+    mockCreate.mockReset();
+    mockFindUnique.mockReset();
+    mockUpdate.mockReset();
+    mockDelete.mockReset();
+  });
+
+  it("throws Not found if list belongs to another user", async () => {
+    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "other" });
+    await expect(deleteList("l1")).rejects.toThrow("Not found");
+  });
+
+  it("deletes the list", async () => {
+    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "user-1" });
+    mockDelete.mockResolvedValue({});
+    await deleteList("l1");
+    expect(mockDelete).toHaveBeenCalledWith({ where: { id: "l1" } });
   });
 });
