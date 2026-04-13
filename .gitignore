@@ -1,0 +1,18 @@
+# Environment / secrets — never commit these
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.bun/
+
+# Next.js build output
+.next/
+out/
+
+# Prisma generated client
+prisma/generated/
+
+# OS
+.DS_Store
