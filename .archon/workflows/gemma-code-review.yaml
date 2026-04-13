@@ -1,0 +1,124 @@
+name: gemma-code-review
+description: |
+  Run 10 parallel Gemma code review subagents, each with a different critical perspective.
+  Produces a multi-perspective review covering security, simplicity, performance, etc.
+  Run this before marking a PR ready for external review.
+  Triggers: "gemma review", "multi-perspective review", "10-critic review"
+
+nodes:
+  - id: get-diff
+    bash: |
+      PR="${ARGUMENTS:-$(gh pr view --json number --jq .number 2>/dev/null)}"
+      echo "pr_number=$PR"
+      gh pr diff "$PR" 2>/dev/null | head -2000
+
+  - id: security-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are a SECURITY reviewer. Review this code diff for: injection vulnerabilities, auth bypass, data leaks, secret exposure, CSRF, insecure defaults. Only report real issues with file:line references. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: simplicity-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are a SIMPLICITY reviewer. Review this code diff for: unnecessary complexity, over-engineering, abstractions that could be simpler, dead code, premature optimization. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: performance-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are a PERFORMANCE reviewer. Review this code diff for: N+1 queries, missing indexes, unnecessary re-renders, large bundle imports, inefficient algorithms, memory leaks. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: accessibility-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are an ACCESSIBILITY reviewer. Review this code diff for: missing ARIA labels, keyboard navigation gaps, color contrast issues, missing form labels, screen reader compatibility. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: error-handling-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are an ERROR HANDLING reviewer. Review this code diff for: unhandled promise rejections, missing try/catch, silent failures, poor error messages, missing validation, race conditions. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: testing-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are a TESTING reviewer. Review this code diff for: missing test coverage, tests that don't actually test behavior, brittle tests, missing edge cases, tests that would pass even if the code was broken. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: naming-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are a NAMING & READABILITY reviewer. Review this code diff for: misleading variable/function names, unclear abbreviations, inconsistent naming conventions, confusing code flow, missing comments on non-obvious logic. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: type-safety-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are a TYPE SAFETY reviewer. Review this code diff for: any/unknown types that should be specific, type assertions that hide bugs, missing null checks, implicit type coercions, interface mismatches between components. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: api-design-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are an API DESIGN reviewer. Review this code diff for: inconsistent function signatures, unclear return types, breaking changes, missing input validation at boundaries, leaky abstractions, confusing prop interfaces. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: maintainability-review
+    bash: |
+      .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 90 1 \
+        "You are a MAINTAINABILITY reviewer. Review this code diff for: tight coupling between modules, files doing too much, unclear dependencies, magic numbers/strings, code that will be hard to modify later, missing documentation for complex logic. Only report real issues. Be concise.
+
+${{ $get-diff.output }}"
+    depends_on: [get-diff]
+    timeout: 120000
+
+  - id: summarize
+    prompt: |
+      Compile the 10 review perspectives into a single report.
+
+      Security: ${{ $security-review.output }}
+      Simplicity: ${{ $simplicity-review.output }}
+      Performance: ${{ $performance-review.output }}
+      Accessibility: ${{ $accessibility-review.output }}
+      Error Handling: ${{ $error-handling-review.output }}
+      Testing: ${{ $testing-review.output }}
+      Naming: ${{ $naming-review.output }}
+      Type Safety: ${{ $type-safety-review.output }}
+      API Design: ${{ $api-design-review.output }}
+      Maintainability: ${{ $maintainability-review.output }}
+
+      Format as a table: | Perspective | Issues Found | Severity | Details |
+      Deduplicate findings across perspectives. Only include actual issues, not praise.
+    depends_on: [security-review, simplicity-review, performance-review, accessibility-review, error-handling-review, testing-review, naming-review, type-safety-review, api-design-review, maintainability-review]
+    trigger_rule: all_done
+    allowed_tools: []
