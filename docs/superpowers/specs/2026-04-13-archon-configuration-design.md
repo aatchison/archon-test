@@ -36,10 +36,11 @@ A `CLAUDE.md` at the repo root provides every Archon workflow with project conte
 
 **Contents:**
 - Project purpose: Next.js todo/task manager, Archon sandbox
-- Stack: Next.js (App Router), TypeScript, SQLite via Prisma, Tailwind CSS
+- Stack: Next.js (App Router), TypeScript, SQLite via Prisma, Tailwind CSS, Biome (formatting)
+- Package manager: `bun` (not npm)
 - Conventions: API routes in `app/api/`, components in `app/components/`, Prisma schema in `prisma/`
 - Testing: Jest + React Testing Library
-- Dev commands: `npm run dev`, `npm run build`, `npm test`, `npx prisma migrate dev`
+- Dev commands: `bun run dev`, `bun run build`, `bun test`, `bunx prisma migrate dev`
 
 ## 3. Workspace Permissions (`.claude/settings.local.json`)
 
@@ -50,9 +51,11 @@ Expand from the current `gh issue:*`-only allow list to cover commands Archon wo
   "permissions": {
     "allow": [
       "Bash(gh issue:*)",
-      "Bash(npm run *)",
-      "Bash(npx prisma *)",
-      "Bash(npx create-next-app *)",
+      "Bash(bun run *)",
+      "Bash(bun add *)",
+      "Bash(bun install)",
+      "Bash(bunx prisma *)",
+      "Bash(bunx create-next-app *)",
       "Bash(git status)",
       "Bash(git diff *)",
       "Bash(git log *)",
@@ -80,4 +83,4 @@ Enumerates specific subcommands rather than broad wildcards. Destructive git ope
 - `archon workflow list` exits successfully with a non-empty list of workflows and no errors
 - `archon chat "hello"` routes to Claude (sonnet) successfully
 - `CLAUDE.md` is present and describes the stack accurately
-- Archon workflows can run `npm`, `npx`, and `git` commands without permission prompts
+- Archon workflows can run `bun`, `bunx`, and `git` commands without permission prompts
