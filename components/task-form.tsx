@@ -9,7 +9,7 @@ export default function TaskForm({ listId }: { listId: string }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim()) return
-    await createTask(listId, title)
+    await createTask(listId, { title: title.trim() })
     setTitle('')
   }
 

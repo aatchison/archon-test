@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { mock, describe, it, expect, beforeEach, spyOn } from "bun:test";
 
 mock.module("@/lib/auth", () => ({

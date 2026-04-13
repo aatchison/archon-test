@@ -6,7 +6,7 @@ export default function Sidebar({
   user,
 }: {
   lists: { id: string; name: string }[];
-  user: { name: string | null };
+  user: { name?: string | null; email?: string | null };
 }) {
   return (
     <aside className="w-64 border-r bg-gray-50 flex flex-col h-full">
@@ -35,7 +35,7 @@ export default function Sidebar({
         </div>
       </nav>
       <div className="p-4 border-t flex items-center justify-between">
-        <span className="text-sm font-medium">{user?.name}</span>
+        <span className="text-sm font-medium">{user?.name ?? user?.email}</span>
         <form
           action={async () => {
             "use server";

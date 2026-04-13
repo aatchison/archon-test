@@ -1,46 +1,53 @@
-import { getAuth, getListWithTasks } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import TaskForm from '@/components/task-form'
-import TaskItem from '@/components/task-item'
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import Link from "next/link";
+import TaskItem from "@/components/task-item";
+import TaskForm from "@/components/task-form";
 
-export default async function ListPage({ params }: { params: { id: string } }) {
-  const user = await getAuth()
-  if (!user) redirect('/login')
+export default async function ListPage({ params }: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
 
-  const list = await getListWithTasks(params.id)
-  if (!list) redirect('/lists')
+  const { id } = await params;
+  const list = await db.list.findUnique({
+    where: { id },
+    include: {
+      tasks: { orderBy: [{ done: "asc" }, { createdAt: "asc" }] },
+    },
+  });
 
-  const pendingTasks = list.tasks.filter(t => !t.done)
-  const doneTasks = list.tasks.filter(t => t.done)
+  if (!list || list.ownerId !== session.user.id) notFound();
+
+  const pending = list.tasks.filter((t: { done: boolean }) => !t.done);
+  const done = list.tasks.filter((t: { done: boolean }) => t.done);
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{list.name}</h1>
-        <Link href={`/lists/${params.id}/settings`} className="text-blue-500 underline">
+    <div className="max-w-2xl">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">{list.name}</h1>
+        <Link href={`/lists/${list.id}/settings`} className="text-sm text-gray-400 hover:text-gray-900">
           Settings
         </Link>
       </div>
-
-      <TaskForm listId={params.id} />
-
-      <div className="space-y-2">
-        {pendingTasks.map(task => (
+      <TaskForm listId={list.id} />
+      <div className="mt-4 space-y-1">
+        {pending.map((task: any) => (
           <TaskItem key={task.id} task={task} />
         ))}
-      </div>
-
-      {doneTasks.length > 0 && (
-        <>
-          <hr className="my-6" />
-          <div className="space-y-2">
-            {doneTasks.map(task => (
+        {done.length > 0 && (
+          <>
+            <div className="border-t my-4" />
+            <p className="text-xs text-gray-400 mb-2 px-3">Completed</p>
+            {done.map((task: any) => (
               <TaskItem key={task.id} task={task} />
             ))}
-          </div>
-        </>
-      )}
+          </>
+        )}
+        {list.tasks.length === 0 && (
+          <p className="text-gray-400 text-sm mt-4 px-3">No tasks yet.</p>
+        )}
+      </div>
     </div>
-  )
+  );
 }
