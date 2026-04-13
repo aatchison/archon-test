@@ -1,0 +1,151 @@
+name: devcontainer
+description: |
+  Manage the Archon devcontainer lifecycle.
+  Supports: build, rebuild, rebuild-nocache, stop, status, exec <cmd>.
+  Checks prerequisites (devcontainer CLI, docker, SSH agent, gitconfig) before acting.
+  Mounts: SSH agent, ~/.gitconfig, ~/.aws from host. Ports: 3000, 5173, 4321.
+
+nodes:
+  - id: check-prereqs
+    bash: |
+      ISSUES=""
+      which devcontainer >/dev/null 2>&1 || ISSUES="${ISSUES}\n- devcontainer CLI not found (install: npm install -g @devcontainers/cli)"
+      which docker >/dev/null 2>&1 || ISSUES="${ISSUES}\n- docker not found"
+      docker info >/dev/null 2>&1 || ISSUES="${ISSUES}\n- docker daemon not running"
+      [ -n "$SSH_AUTH_SOCK" ] && ssh-add -l >/dev/null 2>&1 || ISSUES="${ISSUES}\n- SSH agent not running or no keys loaded (run: eval \$(ssh-agent -s) && ssh-add)"
+      [ -f "$HOME/.gitconfig" ] || ISSUES="${ISSUES}\n- ~/.gitconfig not found"
+      CONTAINER=$(docker ps -q --filter "label=devcontainer.local_folder=$(pwd)" 2>/dev/null | head -1)
+      echo "prereq_issues=${ISSUES}"
+      echo "container_running=$([ -n "$CONTAINER" ] && echo true || echo false)"
+      echo "container_id=${CONTAINER}"
+      echo "ssh_auth_sock=${SSH_AUTH_SOCK}"
+      echo "aws_dir_exists=$([ -d "$HOME/.aws" ] && echo true || echo false)"
+
+  - id: classify
+    prompt: |
+      Classify the user's devcontainer request and check if prerequisites are met.
+
+      User request: $ARGUMENTS
+      System state:
+      $check-prereqs.output
+
+      Rules:
+      - If prereq_issues is non-empty, action = "fix-prereqs"
+      - "build" or "start" or "up" → action = "build"
+      - "rebuild" without "no-cache" or "nocache" → action = "rebuild"
+      - "no-cache", "nocache", "fresh build", "clean build" → action = "rebuild-nocache"
+      - "stop" or "down" → action = "stop"
+      - "status" or "running" or "check" → action = "status"
+      - "exec", "run", "shell" followed by a command → action = "exec", exec_command = the command
+      - "shell" or "open shell" with no command → action = "exec", exec_command = "zsh"
+    depends_on: [check-prereqs]
+    model: haiku
+    allowed_tools: []
+    output_format:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [build, rebuild, rebuild-nocache, stop, status, exec, fix-prereqs]
+        exec_command:
+          type: string
+          description: Command to run inside the container (for exec action only)
+        reason:
+          type: string
+          description: Brief explanation of classification
+      required: [action]
+
+  - id: fix-prereqs
+    prompt: |
+      The following devcontainer prerequisites are not met:
+      $check-prereqs.output
+
+      Provide exact, copy-pasteable commands to fix each issue.
+      Be concise — one command per issue, with a one-line explanation.
+    depends_on: [classify]
+    when: "$classify.output.action == 'fix-prereqs'"
+    allowed_tools: []
+
+  - id: show-status
+    prompt: |
+      Report the devcontainer status clearly.
+      State: $check-prereqs.output
+      Workspace: $ARGUMENTS
+
+      Include: whether the container is running, which ports are forwarded (3000 API, 5173 Web UI, 4321 Docs),
+      and SSH/AWS/git mount availability. Be concise.
+    depends_on: [classify]
+    when: "$classify.output.action == 'status'"
+    allowed_tools: []
+
+  - id: do-build
+    bash: |
+      devcontainer up --workspace-folder .
+    depends_on: [classify]
+    when: "$classify.output.action == 'build'"
+    timeout: 300000
+
+  - id: do-rebuild
+    bash: |
+      CONTAINER=$(docker ps -q --filter "label=devcontainer.local_folder=$(pwd)" 2>/dev/null)
+      if [ -n "$CONTAINER" ]; then
+        echo "Stopping existing container..."
+        docker stop "$CONTAINER"
+      fi
+      echo "Rebuilding..."
+      devcontainer up --workspace-folder .
+    depends_on: [classify]
+    when: "$classify.output.action == 'rebuild'"
+    timeout: 300000
+
+  - id: do-rebuild-nocache
+    bash: |
+      CONTAINER=$(docker ps -q --filter "label=devcontainer.local_folder=$(pwd)" 2>/dev/null)
+      if [ -n "$CONTAINER" ]; then
+        echo "Stopping existing container..."
+        docker stop "$CONTAINER"
+      fi
+      echo "Rebuilding with --no-cache..."
+      devcontainer up --workspace-folder . --build-no-cache
+    depends_on: [classify]
+    when: "$classify.output.action == 'rebuild-nocache'"
+    timeout: 600000
+
+  - id: do-stop
+    bash: |
+      CONTAINER=$(docker ps -q --filter "label=devcontainer.local_folder=$(pwd)" 2>/dev/null)
+      if [ -n "$CONTAINER" ]; then
+        docker stop "$CONTAINER"
+        echo "Container stopped."
+      else
+        echo "No running container found for this workspace."
+      fi
+    depends_on: [classify]
+    when: "$classify.output.action == 'stop'"
+
+  - id: do-exec
+    bash: |
+      devcontainer exec --workspace-folder . $classify.output.exec_command
+    depends_on: [classify]
+    when: "$classify.output.action == 'exec'"
+    timeout: 120000
+
+  - id: summarize
+    prompt: |
+      Summarize the devcontainer operation for the user.
+
+      Action: $classify.output.action
+      Reason: $classify.output.reason
+      Prereq state: $check-prereqs.output
+      Build output: $do-build.output
+      Rebuild output: $do-rebuild.output
+      Rebuild-nocache output: $do-rebuild-nocache.output
+      Stop output: $do-stop.output
+      Exec output: $do-exec.output
+
+      Be concise. If the operation succeeded, confirm what's now running and which ports are available.
+      If it failed, explain why and suggest a fix.
+      If fix-prereqs or show-status handled it, just say "see above."
+    depends_on: [fix-prereqs, show-status, do-build, do-rebuild, do-rebuild-nocache, do-stop, do-exec]
+    trigger_rule: all_done
+    allowed_tools: []

@@ -1,0 +1,63 @@
+{
+  "name": "Archon Dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+
+  // Use features instead of Dockerfile or postCreateCommand where possible
+  "features": {
+    "ghcr.io/shyim/devcontainers-features/bun:latest": {},
+    "ghcr.io/devcontainers/features/git:latest": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:latest": {
+      "moby": false,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:latest": {},
+    "ghcr.io/devcontainers/features/common-utils:latest": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    }
+  },
+
+  // Forward dev server ports
+  "forwardPorts": [3000, 5173, 4321],
+  "portsAttributes": {
+    "3000": { "label": "Archon API", "onAutoForward": "notify" },
+    "5173": { "label": "Archon Web UI", "onAutoForward": "notify" },
+    "4321": { "label": "Archon Docs", "onAutoForward": "notify" }
+  },
+
+  // Mount SSH agent, git config, and AWS credentials from host at build time
+  "mounts": [
+    // SSH agent forwarding
+    "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind",
+    // Git identity
+    "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,readonly",
+    // AWS credentials
+    "source=${localEnv:HOME}/.aws,target=/root/.aws,type=bind,readonly"
+  ],
+
+  // Expose SSH agent socket inside the container
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/ssh-agent"
+  },
+
+  // Install dependencies once on container create (not a post-run step or Dockerfile layer)
+  "onCreateCommand": "bun install",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-pull-request-github"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  }
+}
