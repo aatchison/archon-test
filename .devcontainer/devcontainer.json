@@ -33,7 +33,7 @@
   "initializeCommand": "echo 'SSH_AUTH_SOCK=${SSH_AUTH_SOCK:-not set}'",
 
   // Install dependencies once on container create (not a post-run step or Dockerfile layer)
-  "onCreateCommand": "bun install && curl -fsSL https://opencode.ai/install | bash || true",
+  "onCreateCommand": "bun install && (curl -fsSL https://opencode.ai/install | bash || true)",
 
   "customizations": {
     "vscode": {

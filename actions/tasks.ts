@@ -37,7 +37,11 @@ export async function updateTask(id: string, data: Partial<TaskInput>) {
   });
   if (!task || task.list.ownerId !== session.user.id)
     throw new Error("Not found");
-  const updated = await db.task.update({ where: { id }, data });
+  if (data.title !== undefined && !data.title.trim())
+    throw new Error("Title is required");
+  const normalizedData =
+    data.title !== undefined ? { ...data, title: data.title.trim() } : data;
+  const updated = await db.task.update({ where: { id }, data: normalizedData });
   revalidatePath(`/lists/${task.listId}`);
   return updated;
 }

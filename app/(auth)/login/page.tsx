@@ -17,20 +17,38 @@ export default function LoginPage() {
           className="flex flex-col gap-4"
         >
           <h1 className="text-2xl font-bold mb-4">Login</h1>
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            required
-            className="p-2 border rounded"
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            required
-            className="p-2 border rounded"
-          />
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Email"
+              required
+              className="mt-1 w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              required
+              className="mt-1 w-full p-2 border rounded"
+            />
+          </div>
           <button
             type="submit"
             className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
