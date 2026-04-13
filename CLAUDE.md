@@ -42,3 +42,7 @@ SSH agent, `~/.gitconfig`, and `~/.aws` are mounted from the host automatically.
 ## Testing
 
 Jest + React Testing Library. Tests live alongside source files in `__tests__/` directories or as `*.test.ts(x)` files.
+
+## Conventions
+
+- **Create a GitHub issue for every feature before starting work.** All branches and PRs must reference an issue (e.g. `Closes #N` in the PR body). This ensures every piece of work is tracked and discoverable.
