@@ -1,11 +1,19 @@
 #!/bin/bash
 # run-opencode.sh — Run opencode with activity-based watchdog
-# Usage: run-opencode.sh <model> <idle_timeout_secs> <max_retries> <prompt...>
+# Usage: run-opencode.sh [--devcontainer] <model> <idle_timeout_secs> <max_retries> <prompt...>
 #
 # Monitors opencode output. If no new output appears for $idle_timeout_secs,
 # kills the process and retries (up to $max_retries times).
+#
+# --devcontainer: Run opencode inside the devcontainer via `devcontainer exec`
 
-MODEL="${1:?Usage: run-opencode.sh <model> <idle_timeout> <max_retries> <prompt...>}"
+USE_DEVCONTAINER=false
+if [ "$1" = "--devcontainer" ]; then
+  USE_DEVCONTAINER=true
+  shift
+fi
+
+MODEL="${1:?Usage: run-opencode.sh [--devcontainer] <model> <idle_timeout> <max_retries> <prompt...>}"
 IDLE_TIMEOUT="${2:-120}"
 MAX_RETRIES="${3:-2}"
 shift 3
@@ -20,7 +28,12 @@ while [ $ATTEMPT -lt $MAX_RETRIES ]; do
   OUTFILE=$(mktemp /tmp/opencode-out.XXXXXX)
 
   # Start opencode in background, tee output to file and stdout
-  opencode run -m "$MODEL" --dangerously-skip-permissions "$PROMPT" > "$OUTFILE" 2>&1 &
+  if [ "$USE_DEVCONTAINER" = true ]; then
+    devcontainer exec --workspace-folder . \
+      opencode run -m "$MODEL" --dangerously-skip-permissions "$PROMPT" > "$OUTFILE" 2>&1 &
+  else
+    opencode run -m "$MODEL" --dangerously-skip-permissions "$PROMPT" > "$OUTFILE" 2>&1 &
+  fi
   OC_PID=$!
 
   LAST_SIZE=0
