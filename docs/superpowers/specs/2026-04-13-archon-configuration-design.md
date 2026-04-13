@@ -28,7 +28,7 @@ concurrency:
   maxConversations: 10
 ```
 
-Streaming section remains commented (CLI defaults are fine). No additional assistants needed — Claude uses global auth already configured in `.env`.
+Streaming section remains commented (CLI defaults are fine). No additional assistants needed — Claude uses global auth. Authentication secrets (API keys, tokens) must be stored at the user/machine level outside version control — OS keychain, a CLI secret store, or per-user environment variables. Any local `.env` files used for development must be added to `.gitignore` and never committed.
 
 ## 2. Workspace `CLAUDE.md`
 
@@ -51,18 +51,33 @@ Expand from the current `gh issue:*`-only allow list to cover commands Archon wo
     "allow": [
       "Bash(gh issue:*)",
       "Bash(npm run *)",
-      "Bash(npx *)",
-      "Bash(git *)"
+      "Bash(npx prisma *)",
+      "Bash(npx create-next-app *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push)",
+      "Bash(git pull)",
+      "Bash(git checkout *)",
+      "Bash(git stash)",
+      "Bash(git stash pop)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)"
     ]
   }
 }
 ```
 
-Keeps explicit allow-listing rather than opening all Bash — covers builds, tests, migrations, and git operations.
+Enumerates specific subcommands rather than broad wildcards. Destructive git operations (`--force` push, `--hard` reset, `clean -f`) are explicitly denied.
 
 ## Success Criteria
 
-- `archon workflow list` shows 20 built-in workflows with no errors
+- `archon workflow list` exits successfully with a non-empty list of workflows and no errors
 - `archon chat "hello"` routes to Claude (sonnet) successfully
 - `CLAUDE.md` is present and describes the stack accurately
 - Archon workflows can run `npm`, `npx`, and `git` commands without permission prompts
