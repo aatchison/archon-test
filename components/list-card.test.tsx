@@ -1,6 +1,8 @@
-import { describe, it, expect } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, afterEach } from "bun:test";
+import { render, screen, cleanup } from "@testing-library/react";
 import ListCard from "./list-card";
+
+afterEach(cleanup);
 
 describe("ListCard", () => {
   it("renders list name", () => {
