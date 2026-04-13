@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import LabelBadge from "./label-badge";
+import { LabelBadge } from "./label-badge";
 
 interface Label {
   id: string;
@@ -88,7 +88,12 @@ export function LabelPicker({
 
       <div className="flex flex-wrap gap-1 mt-2">
         {selectedLabels.map((label) => (
-          <LabelBadge key={label.id} label={label} />
+          <LabelBadge
+            key={label.id}
+            name={label.name}
+            color={label.color}
+            onRemove={() => toggleLabel(label.id)}
+          />
         ))}
       </div>
     </div>

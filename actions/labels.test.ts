@@ -32,13 +32,30 @@ mock.module("@/lib/db", () => ({
 }));
 mock.module("next/cache", () => ({ revalidatePath: () => {} }));
 
-const { createLabel, updateLabel, deleteLabel, addLabelToTask, removeLabelFromTask } = await import("./labels");
+const {
+  createLabel,
+  updateLabel,
+  deleteLabel,
+  addLabelToTask,
+  removeLabelFromTask,
+} = await import("./labels");
 
-const mockLabel = { id: "lb1", name: "Work", color: "#3b82f6", userId: "user-1" };
-const mockTask = { id: "t1", listId: "l1", list: { id: "l1", ownerId: "user-1" } };
+const mockLabel = {
+  id: "lb1",
+  name: "Work",
+  color: "#3b82f6",
+  userId: "user-1",
+};
+const mockTask = {
+  id: "t1",
+  listId: "l1",
+  list: { id: "l1", ownerId: "user-1" },
+};
 
 describe("createLabel", () => {
-  beforeEach(() => { mockLabelCreate.mockReset(); });
+  beforeEach(() => {
+    mockLabelCreate.mockReset();
+  });
 
   it("throws if name is empty", async () => {
     await expect(createLabel({ name: "", color: "#fff" })).rejects.toThrow();
@@ -52,7 +69,10 @@ describe("createLabel", () => {
 });
 
 describe("updateLabel", () => {
-  beforeEach(() => { mockLabelFindUnique.mockReset(); mockLabelUpdate.mockReset(); });
+  beforeEach(() => {
+    mockLabelFindUnique.mockReset();
+    mockLabelUpdate.mockReset();
+  });
 
   it("throws if label belongs to another user", async () => {
     mockLabelFindUnique.mockResolvedValue({ ...mockLabel, userId: "other" });
@@ -68,7 +88,10 @@ describe("updateLabel", () => {
 });
 
 describe("deleteLabel", () => {
-  beforeEach(() => { mockLabelFindUnique.mockReset(); mockLabelDelete.mockReset(); });
+  beforeEach(() => {
+    mockLabelFindUnique.mockReset();
+    mockLabelDelete.mockReset();
+  });
 
   it("throws if label belongs to another user", async () => {
     mockLabelFindUnique.mockResolvedValue({ ...mockLabel, userId: "other" });
@@ -84,10 +107,17 @@ describe("deleteLabel", () => {
 });
 
 describe("addLabelToTask", () => {
-  beforeEach(() => { mockTaskFindUnique.mockReset(); mockLabelFindUnique.mockReset(); mockTaskLabelCreate.mockReset(); });
+  beforeEach(() => {
+    mockTaskFindUnique.mockReset();
+    mockLabelFindUnique.mockReset();
+    mockTaskLabelCreate.mockReset();
+  });
 
   it("throws if task belongs to another user", async () => {
-    mockTaskFindUnique.mockResolvedValue({ ...mockTask, list: { id: "l1", ownerId: "other" } });
+    mockTaskFindUnique.mockResolvedValue({
+      ...mockTask,
+      list: { id: "l1", ownerId: "other" },
+    });
     await expect(addLabelToTask("t1", "lb1")).rejects.toThrow();
   });
 
@@ -96,17 +126,24 @@ describe("addLabelToTask", () => {
     mockLabelFindUnique.mockResolvedValue(mockLabel);
     mockTaskLabelCreate.mockResolvedValue({});
     await addLabelToTask("t1", "lb1");
-    expect(mockTaskLabelCreate).toHaveBeenCalledWith({ data: { taskId: "t1", labelId: "lb1" } });
+    expect(mockTaskLabelCreate).toHaveBeenCalledWith({
+      data: { taskId: "t1", labelId: "lb1" },
+    });
   });
 });
 
 describe("removeLabelFromTask", () => {
-  beforeEach(() => { mockTaskFindUnique.mockReset(); mockTaskLabelDelete.mockReset(); });
+  beforeEach(() => {
+    mockTaskFindUnique.mockReset();
+    mockTaskLabelDelete.mockReset();
+  });
 
   it("removes the task-label association", async () => {
     mockTaskFindUnique.mockResolvedValue(mockTask);
     mockTaskLabelDelete.mockResolvedValue({});
     await removeLabelFromTask("t1", "lb1");
-    expect(mockTaskLabelDelete).toHaveBeenCalledWith({ where: { taskId_labelId: { taskId: "t1", labelId: "lb1" } } });
+    expect(mockTaskLabelDelete).toHaveBeenCalledWith({
+      where: { taskId_labelId: { taskId: "t1", labelId: "lb1" } },
+    });
   });
 });

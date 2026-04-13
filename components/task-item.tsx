@@ -16,8 +16,8 @@ interface Task {
   title: string;
   description: string | null;
   done: boolean;
-  priority: "HIGH" | "MEDIUM" | "LOW" | "NONE";
-  dueDate: string | null;
+  priority: string;
+  dueDate: Date | string | null;
   listId: string;
   labels: Label[];
 }
@@ -30,14 +30,14 @@ interface TaskItemProps {
 export default function TaskItem({ task, allLabels }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const priorityColors = {
+  const priorityColors: Record<string, string> = {
     HIGH: "bg-red-500 text-white",
     MEDIUM: "bg-amber-500 text-white",
     LOW: "bg-blue-500 text-white",
     NONE: "hidden",
   };
 
-  const formatDueDate = (dateString: string | null) => {
+  const formatDueDate = (dateString: Date | string | null) => {
     if (!dateString) return null;
     const date = new Date(dateString);
     const today = new Date();
@@ -116,6 +116,7 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
           <TaskEditForm
             task={{
               ...task,
+              dueDate: task.dueDate ? String(task.dueDate) : null,
               labels: task.labels.map((l) => ({ labelId: l.id })),
             }}
             allLabels={allLabels}

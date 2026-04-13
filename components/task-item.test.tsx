@@ -13,36 +13,38 @@ afterEach(cleanup);
 const base = {
   id: "t1",
   title: "Write tests",
+  description: null,
   done: false,
   priority: "NONE" as const,
-  dueDate: undefined,
+  dueDate: null,
   listId: "l1",
+  labels: [],
 };
 
 describe("TaskItem", () => {
   it("renders the task title", () => {
-    render(<TaskItem task={base} />);
+    render(<TaskItem task={base} allLabels={[]} />);
     expect(screen.getByText("Write tests")).toBeTruthy();
   });
 
   it("shows HIGH priority badge", () => {
-    render(<TaskItem task={{ ...base, priority: "HIGH" }} />);
+    render(<TaskItem task={{ ...base, priority: "HIGH" }} allLabels={[]} />);
     expect(screen.getByText("HIGH")).toBeTruthy();
   });
 
   it("does not render NONE priority as text", () => {
-    render(<TaskItem task={base} />);
+    render(<TaskItem task={base} allLabels={[]} />);
     expect(screen.queryByText("NONE")).toBeNull();
   });
 
   it("applies line-through when done", () => {
-    render(<TaskItem task={{ ...base, done: true }} />);
+    render(<TaskItem task={{ ...base, done: true }} allLabels={[]} />);
     const el = screen.getByText("Write tests");
     expect(el.className).toContain("line-through");
   });
 
   it("renders delete button", () => {
-    render(<TaskItem task={base} />);
+    render(<TaskItem task={base} allLabels={[]} />);
     expect(screen.getByText("Delete")).toBeTruthy();
   });
 });

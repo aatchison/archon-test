@@ -5,7 +5,7 @@ import Link from "next/link";
 import TaskItem from "@/components/task-item";
 import TaskForm from "@/components/task-form";
 import { buildTaskWhere } from "@/lib/filters";
-import TaskFilters from "@/components/task-filters";
+import { TaskFilters } from "@/components/task-filters";
 
 export default async function ListPage({
   params,
@@ -62,19 +62,32 @@ export default async function ListPage({
       </div>
       <TaskFilters
         labels={allLabels}
-        filters={{ priority, label, due, status }}
+        currentFilters={{
+          priority,
+          label: Array.isArray(label) ? label : label ? [label] : undefined,
+          due,
+          status,
+        }}
       />
       <TaskForm listId={list.id} />
       <div className="mt-4 space-y-1">
         {pending.map((task: TaskWithList) => (
-          <TaskItem key={task.id} task={task} allLabels={allLabels} />
+          <TaskItem
+            key={task.id}
+            task={{ ...task, labels: task.labels.map((tl) => tl.label) }}
+            allLabels={allLabels}
+          />
         ))}
         {done.length > 0 && (
           <>
             <div className="border-t my-4" />
             <p className="text-xs text-gray-400 mb-2 px-3">Completed</p>
             {done.map((task: TaskWithList) => (
-              <TaskItem key={task.id} task={task} allLabels={allLabels} />
+              <TaskItem
+                key={task.id}
+                task={{ ...task, labels: task.labels.map((tl) => tl.label) }}
+                allLabels={allLabels}
+              />
             ))}
           </>
         )}
