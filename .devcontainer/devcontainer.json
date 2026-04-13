@@ -20,21 +20,20 @@
 
   // Mount SSH agent, git config, and AWS credentials from host at build time
   "mounts": [
-    // SSH agent forwarding
-    "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind",
     // Git identity
-    "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,readonly",
-    // AWS credentials
-    "source=${localEnv:HOME}/.aws,target=/root/.aws,type=bind,readonly"
+    "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,readonly"
   ],
 
-  // Expose SSH agent socket inside the container
+  // SSH agent — mount conditionally via initializeCommand if SSH_AUTH_SOCK is set
   "remoteEnv": {
-    "SSH_AUTH_SOCK": "/ssh-agent"
+    "SSH_AUTH_SOCK": "${localEnv:SSH_AUTH_SOCK}"
   },
 
+  // Forward SSH agent socket if available
+  "initializeCommand": "echo 'SSH_AUTH_SOCK=${SSH_AUTH_SOCK:-not set}'",
+
   // Install dependencies once on container create (not a post-run step or Dockerfile layer)
-  "onCreateCommand": "bun install",
+  "onCreateCommand": "bun install && (curl -fsSL https://opencode.ai/install | bash || true)",
 
   "customizations": {
     "vscode": {

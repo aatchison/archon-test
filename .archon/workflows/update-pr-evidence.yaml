@@ -1,0 +1,75 @@
+name: update-pr-evidence
+description: |
+  Run the full test suite and update a PR description with test evidence
+  and token usage breakdown from docs/token-usage.md.
+  Captures unit test, integration test, TypeScript check results,
+  and model token usage, then updates the PR body.
+  Triggers: "update pr evidence", "add test evidence", "pr test results"
+
+nodes:
+  - id: parse-args
+    prompt: |
+      Extract the PR number from the arguments.
+      Arguments: $ARGUMENTS
+
+      Output JSON: { "pr_number": <number> }
+      If no PR number is given, use the current branch's PR.
+    model: haiku
+    allowed_tools: []
+    output_format:
+      type: object
+      properties:
+        pr_number:
+          type: integer
+      required: [pr_number]
+
+  - id: run-tests
+    bash: |
+      echo "=== Prisma Generate ==="
+      devcontainer exec --workspace-folder . bunx prisma generate 2>&1
+      echo ""
+      echo "=== Unit Tests ==="
+      devcontainer exec --workspace-folder . bun run test 2>&1
+      UNIT_EXIT=$?
+      echo ""
+      echo "=== Integration Tests ==="
+      devcontainer exec --workspace-folder . bun run test:integration 2>&1
+      INT_EXIT=$?
+      echo ""
+      echo "=== TypeScript Check ==="
+      devcontainer exec --workspace-folder . bunx tsc --noEmit 2>&1
+      TS_EXIT=$?
+      echo ""
+      echo "unit_exit=$UNIT_EXIT"
+      echo "integration_exit=$INT_EXIT"
+      echo "typecheck_exit=$TS_EXIT"
+    depends_on: [parse-args]
+    timeout: 300000
+
+  - id: read-token-usage
+    bash: |
+      if [ -f docs/token-usage.md ]; then
+        cat docs/token-usage.md
+      else
+        echo "No token usage file found at docs/token-usage.md"
+      fi
+    depends_on: [parse-args]
+
+  - id: update-pr
+    prompt: |
+      Update PR #$parse-args.output.pr_number with the test evidence and token usage below.
+
+      Test output:
+      $run-tests.output
+
+      Token usage data:
+      $read-token-usage.output
+
+      Use gh pr edit to update the PR body. Update these sections:
+      1. "## Test Evidence" — formatted test results (pass counts, timing, failures)
+      2. "## Token Usage" — running totals table from docs/token-usage.md and key observations
+
+      Keep all other PR body content intact — only replace those two sections.
+    depends_on: [run-tests, read-token-usage]
+    allowed_tools:
+      - bash

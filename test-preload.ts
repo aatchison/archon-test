@@ -1,0 +1,31 @@
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { mock } from "bun:test";
+
+// Register happy-dom for component tests
+GlobalRegistrator.register();
+
+// Only mock Prisma for unit tests (not integration tests)
+// Integration tests set INTEGRATION_TEST=1 to skip this
+if (!process.env.INTEGRATION_TEST) {
+  mock.module("@prisma/client", () => ({
+    PrismaClient: class MockPrismaClient {},
+  }));
+
+  mock.module("@/lib/db", () => ({
+    db: {
+      user: { findUnique: async () => null, create: async () => ({}) },
+      list: { findMany: async () => [], findUnique: async () => null, create: async () => ({}), update: async () => ({}), delete: async () => ({}) },
+      task: { findMany: async () => [], findUnique: async () => null, create: async () => ({}), update: async () => ({}), delete: async () => ({}) },
+    },
+  }));
+
+  mock.module("next/cache", () => ({
+    revalidatePath: () => {},
+  }));
+
+  mock.module("@/lib/auth", () => ({
+    auth: async () => ({ user: { id: "test-user" } }),
+    signIn: async () => {},
+    signOut: async () => {},
+  }));
+}

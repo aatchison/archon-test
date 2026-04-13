@@ -1,0 +1,66 @@
+name: run-tests
+description: |
+  Run the full test suite inside the devcontainer and report results.
+  Runs unit tests, integration tests, and TypeScript check.
+  Triggers: "run tests", "test plan", "verify tests", "check tests"
+
+nodes:
+  - id: check-container
+    bash: |
+      CONTAINER=$(docker ps -q --filter "label=devcontainer.local_folder=$(pwd)" 2>/dev/null | head -1)
+      if [ -z "$CONTAINER" ]; then
+        echo "container_running=false"
+      else
+        echo "container_running=true"
+        echo "container_id=$CONTAINER"
+      fi
+
+  - id: start-container
+    bash: |
+      devcontainer up --workspace-folder .
+    depends_on: [check-container]
+    when: "$check-container.output.container_running == 'false'"
+    timeout: 300000
+
+  - id: generate-prisma
+    bash: |
+      devcontainer exec --workspace-folder . bunx prisma generate
+    depends_on: [check-container, start-container]
+    trigger_rule: all_done
+    timeout: 30000
+
+  - id: run-unit-tests
+    bash: |
+      devcontainer exec --workspace-folder . bun run test 2>&1
+    depends_on: [generate-prisma]
+    timeout: 120000
+
+  - id: run-integration-tests
+    bash: |
+      devcontainer exec --workspace-folder . bun run test:integration 2>&1
+    depends_on: [generate-prisma]
+    timeout: 120000
+
+  - id: typecheck
+    bash: |
+      devcontainer exec --workspace-folder . bunx tsc --noEmit 2>&1
+    depends_on: [generate-prisma]
+    timeout: 120000
+
+  - id: summarize
+    prompt: |
+      Summarize the test results concisely.
+
+      Unit tests output:
+      $run-unit-tests.output
+
+      Integration tests output:
+      $run-integration-tests.output
+
+      TypeScript check output:
+      $typecheck.output
+
+      Format as a table with pass/fail counts and any errors.
+    depends_on: [run-unit-tests, run-integration-tests, typecheck]
+    trigger_rule: all_done
+    allowed_tools: []

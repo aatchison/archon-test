@@ -1,0 +1,56 @@
+{
+  "name": "archon-todo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "bun test lib/password.test.ts actions/lists.test.ts actions/tasks.test.ts components/list-card.test.tsx components/task-item.test.tsx",
+    "test:watch": "bun test --watch",
+    "test:integration": "INTEGRATION_TEST=1 DATABASE_URL=file:test.db bun test actions/*.integration.test.ts",
+    "test:all": "bun run test && bun run test:integration"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
+    "@libsql/client": "^0.17.2",
+    "@prisma/adapter-libsql": "^7.7.0",
+    "@prisma/client": "^7.7.0",
+    "bcryptjs": "^3.0.3",
+    "next": "16.2.3",
+    "next-auth": "^5.0.0-beta.30",
+    "prisma": "^7.7.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.11",
+    "@happy-dom/global-registrator": "^20.8.9",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/bun": "^1.3.12",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "happy-dom": "^20.8.9",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "tailwindcss": "^4",
+    "ts-jest": "^29.4.9",
+    "typescript": "^5"
+  },
+  "ignoreScripts": [
+    "sharp",
+    "unrs-resolver"
+  ],
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver"
+  ]
+}
