@@ -46,3 +46,5 @@ Jest + React Testing Library. Tests live alongside source files in `__tests__/` 
 ## Conventions
 
 - **Create a GitHub issue for every feature before starting work.** All branches and PRs must reference an issue (e.g. `Closes #N` in the PR body). This ensures every piece of work is tracked and discoverable.
+- **Never merge directly to main.** All changes must go through a pull request, even small ones. Main is protected.
+- **Branch protection is enabled on main.** PRs require passing status checks before merging. Do not bypass with `--force` or admin overrides.
