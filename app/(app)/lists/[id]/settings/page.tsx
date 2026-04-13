@@ -4,7 +4,11 @@ import { db } from "@/lib/db";
 import { renameList, deleteList } from "@/actions/lists";
 import Link from "next/link";
 
-export default async function ListSettingsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ListSettingsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
@@ -15,14 +19,19 @@ export default async function ListSettingsPage({ params }: { params: Promise<{ i
   return (
     <div className="max-w-lg">
       <div className="flex items-center gap-4 mb-6">
-        <Link href={`/lists/${list.id}`} className="text-sm text-gray-400 hover:text-gray-900">
+        <Link
+          href={`/lists/${list.id}`}
+          className="text-sm text-gray-400 hover:text-gray-900"
+        >
           &larr; Back
         </Link>
         <h1 className="text-xl font-semibold">List settings</h1>
       </div>
       <div className="bg-white rounded-lg border divide-y">
         <div className="p-6">
-          <h2 className="text-sm font-medium text-gray-700 mb-3">Rename list</h2>
+          <h2 className="text-sm font-medium text-gray-700 mb-3">
+            Rename list
+          </h2>
           <form
             action={async (formData: FormData) => {
               "use server";
@@ -46,7 +55,9 @@ export default async function ListSettingsPage({ params }: { params: Promise<{ i
         </div>
         <div className="p-6">
           <h2 className="text-sm font-medium text-red-600 mb-3">Delete list</h2>
-          <p className="text-sm text-gray-500 mb-3">Permanently deletes this list and all its tasks.</p>
+          <p className="text-sm text-gray-500 mb-3">
+            Permanently deletes this list and all its tasks.
+          </p>
           <form
             action={async () => {
               "use server";

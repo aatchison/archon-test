@@ -14,7 +14,10 @@ export default async function ListsPage() {
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { tasks: true } },
-      tasks: { where: { done: false, dueDate: { lte: threeDaysFromNow } }, select: { id: true } },
+      tasks: {
+        where: { done: false, dueDate: { lte: threeDaysFromNow } },
+        select: { id: true },
+      },
     },
   });
 
@@ -25,7 +28,9 @@ export default async function ListsPage() {
         <ListForm />
       </div>
       {lists.length === 0 ? (
-        <p className="text-gray-400 text-sm">No lists yet. Create one to get started.</p>
+        <p className="text-gray-400 text-sm">
+          No lists yet. Create one to get started.
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {lists.map((list) => (

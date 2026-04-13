@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="flex flex-col gap-8 w-full max-w-md p-8 border rounded-lg shadow-sm">
-        <form 
+        <form
           action={async (formData: FormData) => {
             "use server";
             await signIn("credentials", {
@@ -13,13 +13,30 @@ export default function LoginPage() {
               password: formData.get("password"),
               redirectTo: "/lists",
             });
-          }} 
+          }}
           className="flex flex-col gap-4"
         >
           <h1 className="text-2xl font-bold mb-4">Login</h1>
-          <input name="email" type="email" placeholder="Email" required className="p-2 border rounded" />
-          <input name="password" type="password" placeholder="Password" required className="p-2 border rounded" />
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Login</button>
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            required
+            className="p-2 border rounded"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            required
+            className="p-2 border rounded"
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          >
+            Login
+          </button>
         </form>
 
         <div className="relative flex py-5 items-center">
@@ -28,19 +45,25 @@ export default function LoginPage() {
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
 
-        <form 
+        <form
           action={async () => {
             "use server";
             await signIn("github", { redirectTo: "/lists" });
           }}
         >
-          <button type="submit" className="w-full bg-black text-white p-2 rounded hover:bg-gray-800">
+          <button
+            type="submit"
+            className="w-full bg-black text-white p-2 rounded hover:bg-gray-800"
+          >
             Continue with GitHub
           </button>
         </form>
       </div>
       <p className="mt-4">
-        Don&apos;t have an account? <Link href="/register" className="text-blue-500 underline">Register</Link>
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="text-blue-500 underline">
+          Register
+        </Link>
       </p>
     </div>
   );

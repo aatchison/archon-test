@@ -31,8 +31,12 @@ export async function createTask(listId: string, data: TaskInput) {
 
 export async function updateTask(id: string, data: Partial<TaskInput>) {
   const session = await getSession();
-  const task = await db.task.findUnique({ where: { id }, include: { list: true } });
-  if (!task || task.list.ownerId !== session.user.id) throw new Error("Not found");
+  const task = await db.task.findUnique({
+    where: { id },
+    include: { list: true },
+  });
+  if (!task || task.list.ownerId !== session.user.id)
+    throw new Error("Not found");
   const updated = await db.task.update({ where: { id }, data });
   revalidatePath(`/lists/${task.listId}`);
   return updated;
@@ -40,17 +44,28 @@ export async function updateTask(id: string, data: Partial<TaskInput>) {
 
 export async function deleteTask(id: string) {
   const session = await getSession();
-  const task = await db.task.findUnique({ where: { id }, include: { list: true } });
-  if (!task || task.list.ownerId !== session.user.id) throw new Error("Not found");
+  const task = await db.task.findUnique({
+    where: { id },
+    include: { list: true },
+  });
+  if (!task || task.list.ownerId !== session.user.id)
+    throw new Error("Not found");
   await db.task.delete({ where: { id } });
   revalidatePath(`/lists/${task.listId}`);
 }
 
 export async function toggleDone(id: string) {
   const session = await getSession();
-  const task = await db.task.findUnique({ where: { id }, include: { list: true } });
-  if (!task || task.list.ownerId !== session.user.id) throw new Error("Not found");
-  const updated = await db.task.update({ where: { id }, data: { done: !task.done } });
+  const task = await db.task.findUnique({
+    where: { id },
+    include: { list: true },
+  });
+  if (!task || task.list.ownerId !== session.user.id)
+    throw new Error("Not found");
+  const updated = await db.task.update({
+    where: { id },
+    data: { done: !task.done },
+  });
   revalidatePath(`/lists/${task.listId}`);
   return updated;
 }

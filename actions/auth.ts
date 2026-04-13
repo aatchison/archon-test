@@ -9,8 +9,10 @@ export async function register(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  if (!email?.trim() || !password) throw new Error("Email and password are required");
-  if (password.length < 8) throw new Error("Password must be at least 8 characters");
+  if (!email?.trim() || !password)
+    throw new Error("Email and password are required");
+  if (password.length < 8)
+    throw new Error("Password must be at least 8 characters");
 
   const existing = await db.user.findUnique({ where: { email: email.trim() } });
   if (existing) throw new Error("Email already in use");

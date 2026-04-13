@@ -1,37 +1,36 @@
-'use server';
+"use server";
 
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { revalidatePath } from 'next/cache';
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 async function getSession() {
   const session = await auth();
-  if (!session?.user) {
-    throw new Error('Unauthorized');
-  }
+  if (!session?.user?.id) throw new Error("Unauthorized");
   return session;
 }
 
 export async function createList(name: string) {
-  if (!name || name.trim() === '') {
-    throw new Error('Name is required');
+  if (!name || name.trim() === "") {
+    throw new Error("Name is required");
   }
 
   const session = await getSession();
+  const trimmed = name.trim();
   const list = await db.list.create({
     data: {
-      name,
+      name: trimmed,
       ownerId: session.user.id,
     },
   });
 
-  revalidatePath('/lists');
+  revalidatePath("/lists");
   return list;
 }
 
 export async function renameList(id: string, name: string) {
-  if (!name || name.trim() === '') {
-    throw new Error('Name is required');
+  if (!name || name.trim() === "") {
+    throw new Error("Name is required");
   }
 
   const session = await getSession();
@@ -40,15 +39,16 @@ export async function renameList(id: string, name: string) {
   });
 
   if (!list || list.ownerId !== session.user.id) {
-    throw new Error('Not found');
+    throw new Error("Not found");
   }
 
+  const trimmed = name.trim();
   const updatedList = await db.list.update({
     where: { id },
-    data: { name },
+    data: { name: trimmed },
   });
 
-  revalidatePath('/lists');
+  revalidatePath("/lists");
   revalidatePath(`/lists/${id}`);
   return updatedList;
 }
@@ -60,12 +60,12 @@ export async function deleteList(id: string) {
   });
 
   if (!list || list.ownerId !== session.user.id) {
-    throw new Error('Not found');
+    throw new Error("Not found");
   }
 
   await db.list.delete({
     where: { id },
   });
 
-  revalidatePath('/lists');
+  revalidatePath("/lists");
 }

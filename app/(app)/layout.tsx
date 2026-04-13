@@ -9,25 +9,18 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-
-  if (!session) {
-    redirect("/login");
-  }
+  if (!session?.user?.id) redirect("/login");
 
   const lists = await db.list.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+    where: { ownerId: session.user.id },
+    select: { id: true, name: true },
+    orderBy: { createdAt: "desc" },
   });
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar lists={lists} user={session.user} />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto p-6">{children}</main>
     </div>
   );
 }

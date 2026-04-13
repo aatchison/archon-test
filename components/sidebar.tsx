@@ -12,10 +12,7 @@ export default function Sidebar({
     <aside className="w-64 border-r bg-gray-50 flex flex-col h-full">
       <div className="p-4 font-bold text-xl border-b">Archon Todo</div>
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        <Link
-          href="/lists"
-          className="block p-2 hover:bg-gray-200 rounded"
-        >
+        <Link href="/lists" className="block p-2 hover:bg-gray-200 rounded">
           All lists
         </Link>
         <div className="pt-4 space-y-1">
@@ -42,7 +39,9 @@ export default function Sidebar({
             await signOut();
           }}
         >
-          <button className="text-sm text-red-600 hover:underline">Sign out</button>
+          <button className="text-sm text-red-600 hover:underline">
+            Sign out
+          </button>
         </form>
       </div>
     </aside>

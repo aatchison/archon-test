@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { createTask } from '@/actions/tasks'
+import { useState } from "react";
+import { createTask } from "@/actions/tasks";
 
 export default function TaskForm({ listId }: { listId: string }) {
-  const [title, setTitle] = useState('')
+  const [title, setTitle] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!title.trim()) return
-    await createTask(listId, { title: title.trim() })
-    setTitle('')
+    e.preventDefault();
+    if (!title.trim()) return;
+    await createTask(listId, { title: title.trim() });
+    setTitle("");
   }
 
   return (
@@ -22,9 +22,12 @@ export default function TaskForm({ listId }: { listId: string }) {
         placeholder="Task title"
         className="flex-1 border p-2 rounded"
       />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
         Add
       </button>
     </form>
-  )
+  );
 }

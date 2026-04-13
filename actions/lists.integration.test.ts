@@ -25,7 +25,7 @@ const { createList, renameList, deleteList } = await import("./lists");
 
 beforeAll(async () => {
   // Reset test database
-  execFileSync("bunx", ["prisma", "migrate", "reset", "--force", ""], {
+  execFileSync("bunx", ["prisma", "migrate", "reset", "--force"], {
     env: { ...process.env, DATABASE_URL: TEST_DB_URL },
     stdio: "pipe",
   });

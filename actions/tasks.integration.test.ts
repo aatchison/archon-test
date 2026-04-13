@@ -21,11 +21,13 @@ const testDb = new PrismaClient({ adapter });
 // Override the db module to use test database
 mock.module("@/lib/db", () => ({ db: testDb }));
 
-const { createTask, toggleDone, updateTask, deleteTask } = await import("./tasks");
+const { createTask, toggleDone, updateTask, deleteTask } = await import(
+  "./tasks"
+);
 
 beforeAll(async () => {
   // Reset test database
-  execFileSync("bunx", ["prisma", "migrate", "reset", "--force", ""], {
+  execFileSync("bunx", ["prisma", "migrate", "reset", "--force"], {
     env: { ...process.env, DATABASE_URL: TEST_DB_URL },
     stdio: "pipe",
   });
