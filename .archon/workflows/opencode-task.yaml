@@ -1,0 +1,81 @@
+name: opencode-task
+description: |
+  Run a mechanical coding task using a local model via opencode.
+  Use for simple, well-specified tasks: file creation, config edits, scaffolding, 1-2 file changes.
+  Frees up Claude API budget for reviews and complex reasoning.
+  Triggers: "opencode task", "use local model", "run with gemma", "cheap subagent".
+  NOT for: architecture decisions, multi-file coordination, debugging, or anything requiring judgment.
+
+nodes:
+  - id: check-opencode
+    bash: |
+      which opencode >/dev/null 2>&1 && echo "available=true" || echo "available=false"
+      opencode models 2>/dev/null | grep -q "vllm-31b/google/gemma-4-31B-it" && echo "model=vllm-31b/google/gemma-4-31B-it" || echo "model=none"
+
+  - id: classify
+    prompt: |
+      Decide whether the task is suitable for a local model or needs Claude.
+
+      Task: $ARGUMENTS
+      opencode state: $check-opencode.output
+
+      A task is suitable for local model if:
+      - It touches 1-2 files with a complete, unambiguous spec
+      - No architectural judgment is needed
+      - The output is mechanical (file creation, config edit, scaffolding)
+
+      A task needs Claude if:
+      - It requires understanding context across many files
+      - It involves debugging or unexpected behavior
+      - It needs architectural decisions
+
+      Output JSON: { "suitable": true|false, "reason": "...", "model": "vllm-31b/google/gemma-4-31B-it" or "claude" }
+    depends_on: [check-opencode]
+    model: haiku
+    allowed_tools: []
+    output_format:
+      type: object
+      properties:
+        suitable:
+          type: boolean
+        reason:
+          type: string
+        model:
+          type: string
+      required: [suitable, reason, model]
+
+  - id: run-opencode
+    bash: |
+      opencode run \
+        -m vllm-31b/google/gemma-4-31B-it \
+        --dir . \
+        --dangerously-skip-permissions \
+        "$ARGUMENTS"
+    depends_on: [classify]
+    when: "$classify.output.suitable == true"
+    timeout: 300000
+
+  - id: run-claude
+    prompt: |
+      The task was routed to Claude because: $classify.output.reason
+
+      Task: $ARGUMENTS
+
+      Please complete the task.
+    depends_on: [classify]
+    when: "$classify.output.suitable == false"
+
+  - id: summarize
+    prompt: |
+      Summarize what was done.
+
+      Task: $ARGUMENTS
+      Routed to: $classify.output.model
+      Reason: $classify.output.reason
+      opencode output: $run-opencode.output
+      Claude output: $run-claude.output
+
+      Be concise. State what was implemented and any files changed.
+    depends_on: [run-opencode, run-claude]
+    trigger_rule: all_done
+    allowed_tools: []
