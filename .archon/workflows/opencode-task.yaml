@@ -46,14 +46,33 @@ nodes:
 
   - id: run-opencode
     bash: |
-      opencode run \
-        -m vllm-31b/google/gemma-4-31B-it \
-        --dir . \
-        --dangerously-skip-permissions \
-        "$ARGUMENTS"
+      # Run opencode with timeout; retry once if it hangs
+      MAX_RETRIES=2
+      ATTEMPT=0
+      while [ $ATTEMPT -lt $MAX_RETRIES ]; do
+        ATTEMPT=$((ATTEMPT + 1))
+        echo "Attempt $ATTEMPT of $MAX_RETRIES"
+        timeout 240 opencode run \
+          -m vllm-31b/google/gemma-4-31B-it \
+          --dir . \
+          --dangerously-skip-permissions \
+          "$ARGUMENTS"
+        EXIT_CODE=$?
+        if [ $EXIT_CODE -eq 0 ]; then
+          break
+        elif [ $EXIT_CODE -eq 124 ]; then
+          echo "opencode timed out (attempt $ATTEMPT), killing and retrying..."
+          pkill -f 'opencode run' 2>/dev/null || true
+          sleep 2
+        else
+          echo "opencode failed with exit code $EXIT_CODE"
+          break
+        fi
+      done
+      exit $EXIT_CODE
     depends_on: [classify]
     when: "$classify.output.suitable == true"
-    timeout: 300000
+    timeout: 600000
 
   - id: run-claude
     prompt: |
