@@ -1,0 +1,60 @@
+name: update-pr-evidence
+description: |
+  Run the full test suite and update a PR description with test evidence.
+  Captures unit test, integration test, and TypeScript check results
+  and appends them to the PR body as formatted evidence.
+  Triggers: "update pr evidence", "add test evidence", "pr test results"
+
+nodes:
+  - id: parse-args
+    prompt: |
+      Extract the PR number from the arguments.
+      Arguments: $ARGUMENTS
+
+      Output JSON: { "pr_number": <number> }
+      If no PR number is given, use the current branch's PR.
+    model: haiku
+    allowed_tools: []
+    output_format:
+      type: object
+      properties:
+        pr_number:
+          type: integer
+      required: [pr_number]
+
+  - id: run-tests
+    bash: |
+      echo "=== Prisma Generate ==="
+      devcontainer exec --workspace-folder . bunx prisma generate 2>&1
+      echo ""
+      echo "=== Unit Tests ==="
+      devcontainer exec --workspace-folder . bun run test 2>&1
+      UNIT_EXIT=$?
+      echo ""
+      echo "=== Integration Tests ==="
+      devcontainer exec --workspace-folder . bun run test:integration 2>&1
+      INT_EXIT=$?
+      echo ""
+      echo "=== TypeScript Check ==="
+      devcontainer exec --workspace-folder . bunx tsc --noEmit 2>&1
+      TS_EXIT=$?
+      echo ""
+      echo "unit_exit=$UNIT_EXIT"
+      echo "integration_exit=$INT_EXIT"
+      echo "typecheck_exit=$TS_EXIT"
+    depends_on: [parse-args]
+    timeout: 300000
+
+  - id: update-pr
+    prompt: |
+      Update PR #$parse-args.output.pr_number with the test evidence below.
+
+      Test output:
+      $run-tests.output
+
+      Use gh pr edit to update the PR body. Add a "## Test Evidence" section
+      with formatted test results (pass counts, timing, any failures).
+      Keep existing PR body content — only replace the Test Evidence section.
+    depends_on: [run-tests]
+    allowed_tools:
+      - bash
