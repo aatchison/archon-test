@@ -18,14 +18,6 @@
     }
   },
 
-  // Forward dev server ports
-  "forwardPorts": [3000, 5173, 4321],
-  "portsAttributes": {
-    "3000": { "label": "Archon API", "onAutoForward": "notify" },
-    "5173": { "label": "Archon Web UI", "onAutoForward": "notify" },
-    "4321": { "label": "Archon Docs", "onAutoForward": "notify" }
-  },
-
   // Mount SSH agent, git config, and AWS credentials from host at build time
   "mounts": [
     // SSH agent forwarding
