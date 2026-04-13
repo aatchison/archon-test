@@ -1,0 +1,68 @@
+name: create-sub-issues
+description: |
+  Create GitHub sub-issues for each task in an implementation plan under a parent feature issue.
+  Parses task titles from plan files and links them as sub-issues using the GitHub API.
+  Triggers: "create sub-issues", "link tasks to issue", "sub-issues for plan"
+
+nodes:
+  - id: validate-inputs
+    prompt: |
+      Parse the arguments to extract:
+      1. Parent issue number (required) - e.g. "11" or "#11"
+      2. Plan file path (optional) - defaults to most recent file in docs/superpowers/plans/
+
+      Arguments: $ARGUMENTS
+
+      Output JSON: { "parent_issue": <number>, "plan_file": "<path or empty>" }
+    model: haiku
+    allowed_tools: []
+    output_format:
+      type: object
+      properties:
+        parent_issue:
+          type: integer
+        plan_file:
+          type: string
+      required: [parent_issue, plan_file]
+
+  - id: find-plan
+    bash: |
+      PLAN_FILE="${{ $validate-inputs.output.plan_file }}"
+      if [ -z "$PLAN_FILE" ]; then
+        PLAN_FILE=$(ls -t docs/superpowers/plans/*.md 2>/dev/null | head -1)
+      fi
+      if [ -z "$PLAN_FILE" ] || [ ! -f "$PLAN_FILE" ]; then
+        echo "error=no plan file found"
+        exit 1
+      fi
+      echo "plan_file=$PLAN_FILE"
+      # Extract task titles (lines starting with ### Task N:)
+      grep -E '^### Task [0-9]+:' "$PLAN_FILE" | sed 's/^### //' | sed 's/ 🤖//' | sed 's/ 🧠//'
+    depends_on: [validate-inputs]
+
+  - id: create-issues
+    prompt: |
+      Create GitHub sub-issues for each task found in the plan.
+
+      Parent issue: #${{ $validate-inputs.output.parent_issue }}
+      Tasks found:
+      ${{ $find-plan.output }}
+
+      For each task:
+      1. Create an issue with `gh issue create --title "<task title>" --body "Sub-task of #<parent>"`
+      2. Get the issue's database ID with `gh api repos/{owner}/{repo}/issues/<number> --jq '.id'`
+      3. Link it as a sub-issue: `gh api repos/{owner}/{repo}/issues/<parent>/sub_issues --method POST --input - <<< '{"sub_issue_id": <db_id>}'`
+
+      Report how many issues were created and linked.
+    depends_on: [find-plan]
+    allowed_tools:
+      - bash
+
+  - id: summarize
+    prompt: |
+      Summarize the results concisely.
+
+      Parent issue: #${{ $validate-inputs.output.parent_issue }}
+      Results: ${{ $create-issues.output }}
+    depends_on: [create-issues]
+    allowed_tools: []
