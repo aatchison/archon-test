@@ -119,5 +119,8 @@ nodes:
 
       Format as a table: | Perspective | Issues Found | Severity | Details |
       Deduplicate findings across perspectives. Only include actual issues, not praise.
+
+      IMPORTANT: After this review, update docs/token-usage.md with a row for this Gemma review round
+      (10 reviewers × ~5k tokens each = ~50k Gemma tokens). Include the round number and findings count.
     depends_on: [cleanup]
     allowed_tools: []

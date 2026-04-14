@@ -62,6 +62,8 @@ nodes:
       $typecheck.output
 
       Format as a table with pass/fail counts and any errors.
+
+      IMPORTANT: Update docs/token-usage.md with a row for this test run if part of a tracked task.
     depends_on: [run-unit-tests, run-integration-tests, typecheck]
     trigger_rule: all_done
     allowed_tools: []

@@ -92,6 +92,8 @@ nodes:
 
       Be concise — list which comments were addressed and what changes were made.
       If the PR is MERGED or CLOSED, state that polling should stop.
+
+      IMPORTANT: Update docs/token-usage.md with token usage for addressing these comments.
     depends_on: [address-comments, check-pr-state]
     trigger_rule: all_done
     allowed_tools: []

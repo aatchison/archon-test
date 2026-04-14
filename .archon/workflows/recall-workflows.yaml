@@ -67,5 +67,8 @@ nodes:
       4. **Memory Highlights** — most relevant remembered preferences and patterns
 
       Be concise. This is a quick-reference card, not documentation.
+
+      REMINDER: Track all token usage throughout this task session.
+      After every Claude or Gemma call, update docs/token-usage.md with the model, tokens, time, and notes.
     depends_on: [list-workflows, list-scripts, load-conventions]
     allowed_tools: []

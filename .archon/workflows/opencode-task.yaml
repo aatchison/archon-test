@@ -77,6 +77,9 @@ nodes:
       Claude output: $run-claude.output
 
       Be concise. State what was implemented and any files changed.
+
+      IMPORTANT: After this task, update docs/token-usage.md with a row for this task
+      including the model used, approximate token count, execution time, and notes.
     depends_on: [run-opencode, run-claude]
     trigger_rule: all_done
     allowed_tools: []
