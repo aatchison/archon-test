@@ -185,12 +185,40 @@ Tracks Claude vs Gemma (opencode) token usage during todo app foundation impleme
 | Gemma (vllm-31b) | ~335k | 50+ runs |
 | Claude (opus) | ~30k | 8 actions |
 
+## Sub-project 5: Search
+
+| Task | Model | Approx Tokens | Notes |
+|------|-------|---------------|-------|
+| FTS5 research | Gemma (vllm-31b) | ~5k | SQLite FTS5 + Prisma patterns |
+| Design brainstorming | Claude (opus) | ~15k | FTS5 approach, filters, UI layout |
+| Gemma design review | Gemma (vllm-31b) | ~5k | Reviewed design sections |
+| Spec writing | Claude (opus) | ~8k | Full design spec |
+| Plan writing | Claude (opus) | ~12k | 13-task plan with full code |
+| Task 1: FTS5 migration | Gemma (vllm-31b) | ~3k | Virtual table + triggers |
+| Task 2: Search module | Gemma (vllm-31b) | ~4k | lib/search.ts — sanitizeQuery, searchTasks |
+| Task 3: Server actions | Gemma (vllm-31b) | ~3k | actions/search.ts |
+| Task 4: Action tests | Claude (opus) subagent | ~15k | actions/search.test.ts |
+| Task 5: Module tests | Claude (opus) subagent | ~16k | lib/search.test.ts |
+| Task 6: SearchResult component | Gemma (vllm-31b) | ~3k | Snippet sanitization |
+| Task 7: SearchResult tests | Claude (opus) subagent | ~15k | 9 component tests |
+| Task 8: SearchBar + sidebar | Claude (opus) | ~5k | Debounced input, keyboard nav |
+| Task 10: Search page | Claude (opus) | ~3k | Server component with pagination |
+| Workflow fixes | Claude (opus) | ~10k | devcontainer mount, run-opencode.sh hardening |
+| Cherry-pick recovery | Claude (opus) | ~5k | Recovered orphaned Gemma commits |
+
+### Sub-project 5 Running Totals (so far)
+
+| Model | Estimated Tokens | Tasks |
+|-------|-----------------|-------|
+| Gemma (vllm-31b) | ~23k | 7 runs |
+| Claude (opus) | ~104k | 12 actions + 3 subagents |
+
 ## Grand Totals (All Sub-projects)
 
 | Model | Estimated Tokens | Task Count | Notes |
 |-------|-----------------|------------|-------|
-| Gemma (vllm-31b) | ~548k+ | 92+ runs | Reviews, mechanical implementation |
-| Claude (opus) | ~30k | 8 actions | Coordination, PR management |
+| Gemma (vllm-31b) | ~571k+ | 99+ runs | Reviews, mechanical implementation |
+| Claude (opus) | ~134k+ | 20+ actions | Coordination, PR management, SP5 lead |
 | Claude (sonnet) | ~99k | 33 actions | Reviews, fixes, test design |
 | Claude (haiku) | ~2k | 1 review | Spec compliance check |
-| **Total** | **~679k+** | **134+ actions** | **81% Gemma, 15% Claude sonnet, 4% Claude opus** |
+| **Total** | **~806k+** | **153+ actions** | **71% Gemma, 17% Claude opus, 12% Claude sonnet** |
