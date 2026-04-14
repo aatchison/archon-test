@@ -46,7 +46,7 @@ describe("createList", () => {
   });
 
   it("creates and returns the list", async () => {
-    const mockList = { id: "l1", name: "Work", ownerId: "user-1" };
+    const mockList = { id: "l1", name: "Work", ownerId: "user-1", version: 0 };
     mockCreate.mockResolvedValue(mockList);
     const result = await createList("Work");
     expect(result).toEqual(mockList);
@@ -68,7 +68,12 @@ describe("renameList", () => {
   });
 
   it("renames the list", async () => {
-    mockUpdate.mockResolvedValue({ id: "l1", name: "New", ownerId: "user-1" });
+    mockUpdate.mockResolvedValue({
+      id: "l1",
+      name: "New",
+      ownerId: "user-1",
+      version: 0,
+    });
     const result = await renameList("l1", "New");
     expect(result.name).toBe("New");
   });

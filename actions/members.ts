@@ -3,6 +3,8 @@
 import { requireOwner } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { eventHub } from "@/lib/event-hub";
+import { auth } from "@/lib/auth";
 
 export async function addMember(
   listId: string,
@@ -48,6 +50,23 @@ export async function addMember(
     },
   });
 
+  const session = await auth();
+  eventHub.publish(listId, {
+    id: crypto.randomUUID(),
+    userId: session?.user?.id ?? "",
+    version: 0,
+    timestamp: Date.now(),
+    event: {
+      type: "member:added",
+      data: {
+        userId: targetUser.id,
+        userName: targetUser.name ?? targetUser.email,
+        role,
+        listId,
+      },
+    },
+  });
+
   revalidatePath(`/lists/${listId}/members`);
 }
 
@@ -69,6 +88,15 @@ export async function removeMember(listId: string, userId: string) {
         userId,
       },
     },
+  });
+
+  const session = await auth();
+  eventHub.publish(listId, {
+    id: crypto.randomUUID(),
+    userId: session?.user?.id ?? "",
+    version: 0,
+    timestamp: Date.now(),
+    event: { type: "member:removed", data: { userId, listId } },
   });
 
   revalidatePath(`/lists/${listId}/members`);
