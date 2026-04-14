@@ -21,7 +21,9 @@
   // Mount SSH agent, git config, and AWS credentials from host at build time
   "mounts": [
     // Git identity
-    "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,readonly"
+    "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,readonly",
+    // opencode config (local models, API keys) — needed for Gemma inside devcontainer
+    "source=${localEnv:HOME}/.config/opencode,target=/root/.config/opencode,type=bind,readonly"
   ],
 
   // SSH agent — mount conditionally via initializeCommand if SSH_AUTH_SOCK is set

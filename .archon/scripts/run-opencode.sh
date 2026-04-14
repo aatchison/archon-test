@@ -29,8 +29,23 @@ while [ $ATTEMPT -lt $MAX_RETRIES ]; do
 
   # Start opencode in background, tee output to file and stdout
   if [ "$USE_DEVCONTAINER" = true ]; then
-    devcontainer exec --workspace-folder . \
-      opencode run -m "$MODEL" --dangerously-skip-permissions "$PROMPT" > "$OUTFILE" 2>&1 &
+    CONTAINER_ID=$(docker ps --filter "label=devcontainer.local_folder=$(pwd)" --format "{{.ID}}" | head -1)
+    if [ -z "$CONTAINER_ID" ]; then
+      echo "ERROR: No devcontainer found for $(pwd)" >&2
+      echo "  Start one with: archon workflow run devcontainer build" >&2
+      exit 1
+    fi
+    # Verify opencode is installed and model is available
+    if ! docker exec "$CONTAINER_ID" bash -c "export PATH=/home/vscode/.opencode/bin:\$PATH && which opencode >/dev/null 2>&1"; then
+      echo "ERROR: opencode not found in devcontainer. Run: docker exec $CONTAINER_ID bash -c 'curl -fsSL https://opencode.ai/install | bash'" >&2
+      exit 1
+    fi
+    if ! docker exec "$CONTAINER_ID" bash -c "export PATH=/home/vscode/.opencode/bin:\$PATH && opencode models 2>/dev/null | grep -q '$MODEL'"; then
+      echo "ERROR: Model '$MODEL' not available in devcontainer." >&2
+      echo "  Ensure opencode config is mounted at /root/.config/opencode in devcontainer.json" >&2
+      exit 1
+    fi
+    docker exec "$CONTAINER_ID" bash -c "cd /workspaces/$(basename "$(pwd)") && export PATH=/home/vscode/.opencode/bin:\$PATH && opencode run -m '$MODEL' --dangerously-skip-permissions '$PROMPT'" > "$OUTFILE" 2>&1 &
   else
     opencode run -m "$MODEL" --dangerously-skip-permissions "$PROMPT" > "$OUTFILE" 2>&1 &
   fi

@@ -6,6 +6,13 @@ description: |
   Triggers: "opencode task", "use local model", "run with gemma", "cheap subagent".
   NOT for: architecture decisions, multi-file coordination, debugging, or anything requiring judgment.
 
+  Devcontainer mode (--devcontainer flag):
+  - Use when the task needs project dependencies (bun, prisma, node_modules)
+  - Requires: opencode config mounted at /root/.config/opencode (see devcontainer.json mounts)
+  - The devcontainer workspace is a bind mount — files on the host's current branch are visible
+  - IMPORTANT: Provide full code inline in prompts, don't reference plan files by path
+    (Gemma has no context of prior conversations or plan documents)
+
 nodes:
   - id: check-opencode
     bash: |
@@ -47,11 +54,21 @@ nodes:
   - id: run-opencode
     bash: |
       # Activity-based watchdog: kills and retries if output goes idle
+      # Use --devcontainer when task needs project deps (bun, prisma, etc.)
+      DEVCONTAINER_FLAG=""
+      if echo "$ARGUMENTS" | grep -qi '\-\-devcontainer'; then
+        DEVCONTAINER_FLAG="--devcontainer"
+        # Strip --devcontainer from arguments before passing to opencode
+        CLEAN_ARGS=$(echo "$ARGUMENTS" | sed 's/--devcontainer//g')
+      else
+        CLEAN_ARGS="$ARGUMENTS"
+      fi
       .archon/scripts/run-opencode.sh \
+        $DEVCONTAINER_FLAG \
         vllm-31b/google/gemma-4-31B-it \
         120 \
         2 \
-        "$ARGUMENTS"
+        "$CLEAN_ARGS"
     depends_on: [classify]
     when: "$classify.output.suitable == true"
     timeout: 600000
