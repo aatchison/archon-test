@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { addMember } from "@/actions/members";
 
 export function InviteForm({ listId }: { listId: string }) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("EDITOR");
   const [loading, setLoading] = useState(false);
@@ -16,6 +18,7 @@ export function InviteForm({ listId }: { listId: string }) {
     try {
       await addMember(listId, email, role as "EDITOR" | "VIEWER");
       setEmail("");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to invite member");
     } finally {

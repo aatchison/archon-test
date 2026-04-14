@@ -11,11 +11,12 @@ export async function addMember(
 ) {
   await requireOwner(listId);
 
-  if (!email) throw new Error("Email is required");
+  const normalizedEmail = email?.trim().toLowerCase();
+  if (!normalizedEmail) throw new Error("Email is required");
   if (role !== "EDITOR" && role !== "VIEWER") throw new Error("Invalid role");
 
   const targetUser = await db.user.findUnique({
-    where: { email: email.trim().toLowerCase() },
+    where: { email: normalizedEmail },
   });
 
   if (!targetUser) throw new Error("User not found");

@@ -24,7 +24,7 @@ export async function createTask(listId: string, data: TaskInput) {
 export async function updateTask(id: string, data: Partial<TaskInput>) {
   const task = await db.task.findUnique({
     where: { id },
-    include: { list: true },
+    select: { id: true, listId: true, done: true, title: true },
   });
   if (!task) throw new Error("Not found");
   await requireEdit(task.listId);
@@ -40,7 +40,7 @@ export async function updateTask(id: string, data: Partial<TaskInput>) {
 export async function deleteTask(id: string) {
   const task = await db.task.findUnique({
     where: { id },
-    include: { list: true },
+    select: { id: true, listId: true, done: true, title: true },
   });
   if (!task) throw new Error("Not found");
   await requireEdit(task.listId);
@@ -51,7 +51,7 @@ export async function deleteTask(id: string) {
 export async function toggleDone(id: string) {
   const task = await db.task.findUnique({
     where: { id },
-    include: { list: true },
+    select: { id: true, listId: true, done: true, title: true },
   });
   if (!task) throw new Error("Not found");
   await requireEdit(task.listId);

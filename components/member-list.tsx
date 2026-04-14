@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { RoleBadge } from "./role-badge";
 import { updateMemberRole, removeMember } from "@/actions/members";
 
@@ -18,6 +19,7 @@ export function MemberList({
   listId: string;
   isOwner: boolean;
 }) {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   return (
@@ -53,6 +55,7 @@ export function MemberList({
                       member.userId,
                       e.target.value as "EDITOR" | "VIEWER",
                     );
+                    router.refresh();
                   } catch (err) {
                     setError(
                       err instanceof Error
@@ -72,6 +75,7 @@ export function MemberList({
                   try {
                     setError(null);
                     await removeMember(listId, member.userId);
+                    router.refresh();
                   } catch (err) {
                     setError(
                       err instanceof Error

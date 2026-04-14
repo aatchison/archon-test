@@ -29,9 +29,7 @@ export default async function ListMembersPage({
   if (!list) notFound();
 
   const ownerAccess = await isOwner(list.id);
-  if (!ownerAccess) {
-    return <div>You do not have permission to manage members.</div>;
-  }
+  if (!ownerAccess) notFound();
 
   const membersWithOwner = [
     {

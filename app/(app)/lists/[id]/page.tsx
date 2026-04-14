@@ -33,6 +33,9 @@ export default async function ListPage({
 
   const where = buildTaskWhere(id, { priority, label, due, status });
 
+  if (!(await canView(id))) notFound();
+  const userCanEdit = await canEdit(id);
+
   const list = await db.list.findUnique({
     where: { id },
     include: {
@@ -44,9 +47,7 @@ export default async function ListPage({
     },
   });
 
-  if (!(await canView(id))) notFound();
   if (!list) notFound();
-  const userCanEdit = await canEdit(id);
 
   type TaskWithList = (typeof list.tasks)[number];
   const pending = list.tasks.filter((t: TaskWithList) => !t.done);

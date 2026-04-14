@@ -52,6 +52,7 @@ export default function TaskItem({
           <input
             type="checkbox"
             checked={task.done}
+            disabled={!canEdit}
             aria-label="Toggle task completion"
             onChange={async () => {
               try {
