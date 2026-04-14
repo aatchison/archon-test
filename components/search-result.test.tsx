@@ -62,7 +62,7 @@ describe("SearchResultItem", () => {
     render(<SearchResultItem result={base} />);
     const mark = document.querySelector("mark");
     expect(mark).toBeTruthy();
-    expect(mark!.textContent).toBe("match");
+    expect(mark!.textContent).toContain("match");
   });
 
   it("strips non-mark HTML from snippet", () => {

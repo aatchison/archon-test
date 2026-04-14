@@ -75,6 +75,13 @@ if (!process.env.INTEGRATION_TEST) {
     },
   }));
 
+  mock.module("@/lib/search", () => ({
+    sanitizeQuery: (raw: string) => raw,
+    searchTasks: async () => ({ tasks: [], total: 0 }),
+    getSearchSuggestions: async () => [],
+    rebuildSearchIndex: async () => {},
+  }));
+
   mock.module("@/lib/realtime-config", () => ({
     REALTIME_CONFIG: {
       keepaliveIntervalMs: 30000,

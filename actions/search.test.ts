@@ -15,6 +15,8 @@ const mockGetSuggestions = spyOn({ fn: async () => [] }, "fn");
 mock.module("@/lib/search", () => ({
   searchTasks: (...args: unknown[]) => mockSearchTasks(...args),
   getSearchSuggestions: (...args: unknown[]) => mockGetSuggestions(...args),
+  sanitizeQuery: (raw: string) => raw,
+  rebuildSearchIndex: async () => {},
 }));
 
 mock.module("@/lib/db", () => ({ db: {} }));

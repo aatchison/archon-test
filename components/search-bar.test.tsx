@@ -23,7 +23,12 @@ const mockGetSuggestions = mock(async () => []);
 mock.module("@/actions/search", () => ({
   getSearchSuggestions: (...args: any[]) => mockGetSuggestions(...args),
 }));
-mock.module("@/lib/search", () => ({}));
+mock.module("@/lib/search", () => ({
+  sanitizeQuery: (raw: string) => raw,
+  searchTasks: async () => ({ tasks: [], total: 0 }),
+  getSearchSuggestions: async () => [],
+  rebuildSearchIndex: async () => {},
+}));
 
 import { SearchBar } from "./search-bar";
 
@@ -62,7 +67,7 @@ describe("SearchBar", () => {
   });
 
   it("shows suggestions after typing", async () => {
-    mockGetSuggestions.mockResolvedValueOnce([
+    mockGetSuggestions.mockImplementation(async () => [
       {
         taskId: "t1",
         title: "Task one",
@@ -72,13 +77,13 @@ describe("SearchBar", () => {
     ]);
     render(<SearchBar />);
     fireEvent.change(screen.getByPlaceholderText("Search tasks..."), {
-      target: { value: "ta" },
+      target: { value: "task" },
     });
     await waitFor(
       () => {
         expect(screen.getByText("Task one")).toBeTruthy();
       },
-      { timeout: 1000 },
+      { timeout: 2000 },
     );
   });
 

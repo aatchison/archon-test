@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { describe, it, expect, beforeEach, spyOn, mock } from "bun:test";
+import { describe, it, expect, beforeEach, mock } from "bun:test";
 import {
   sanitizeQuery,
   searchTasks,
@@ -33,66 +33,58 @@ describe("sanitizeQuery", () => {
   });
 });
 
-function createMockPrisma() {
-  return {
-    $queryRawUnsafe: mock(() => Promise.resolve([])),
-  };
-}
-
 describe("searchTasks", () => {
-  let prisma: ReturnType<typeof createMockPrisma>;
-
-  beforeEach(() => {
-    prisma = createMockPrisma();
-  });
-
   it("returns empty results when sanitized query is empty", async () => {
+    const queryRaw = mock(() => Promise.resolve([]));
+    const prisma = { $queryRawUnsafe: queryRaw };
     const result = await searchTasks(prisma as any, "user1", "");
     expect(result).toEqual({ tasks: [], total: 0 });
-    expect(prisma.$queryRawUnsafe).not.toHaveBeenCalled();
+    expect(queryRaw).not.toHaveBeenCalled();
   });
 
   it("calls $queryRawUnsafe with MATCH and userId params", async () => {
-    prisma.$queryRawUnsafe.mockResolvedValueOnce([{ cnt: 0 }]);
-
+    const calls: any[][] = [];
+    const queryRaw = (...args: any[]) => {
+      calls.push(args);
+      return Promise.resolve([{ cnt: 0 }]);
+    };
+    const prisma = { $queryRawUnsafe: queryRaw };
     await searchTasks(prisma as any, "user1", "test");
 
-    expect(prisma.$queryRawUnsafe).toHaveBeenCalledTimes(1);
-    const call = prisma.$queryRawUnsafe.mock.calls[0];
-    expect(call[0]).toContain("MATCH");
-    expect(call[1]).toBe('"test"*');
-    expect(call[2]).toBe("user1");
+    // Count query should have been called
+    expect(calls.length).toBe(1);
+    expect(calls[0][0]).toContain("COUNT");
+    expect(calls[0][0]).toContain("MATCH");
+    // FTS query param
+    expect(calls[0][1]).toBe('"test"*');
+    // userId params
+    expect(calls[0][2]).toBe("user1");
+    expect(calls[0][3]).toBe("user1");
   });
 });
 
 describe("getSearchSuggestions", () => {
-  let prisma: ReturnType<typeof createMockPrisma>;
-
-  beforeEach(() => {
-    prisma = createMockPrisma();
-  });
-
   it("returns empty array when sanitized query is empty", async () => {
+    const queryRaw = mock(() => Promise.resolve([]));
+    const prisma = { $queryRawUnsafe: queryRaw };
     const result = await getSearchSuggestions(prisma as any, "user1", "");
     expect(result).toEqual([]);
-    expect(prisma.$queryRawUnsafe).not.toHaveBeenCalled();
+    expect(queryRaw).not.toHaveBeenCalled();
   });
 });
 
 describe("rebuildSearchIndex", () => {
-  let prisma: ReturnType<typeof createMockPrisma>;
-
-  beforeEach(() => {
-    prisma = createMockPrisma();
-  });
-
   it("calls DELETE then INSERT on task_fts", async () => {
+    const calls: any[][] = [];
+    const queryRaw = (...args: any[]) => {
+      calls.push(args);
+      return Promise.resolve([]);
+    };
+    const prisma = { $queryRawUnsafe: queryRaw };
     await rebuildSearchIndex(prisma as any);
 
-    expect(prisma.$queryRawUnsafe).toHaveBeenCalledTimes(2);
-    const firstCall = prisma.$queryRawUnsafe.mock.calls[0][0];
-    const secondCall = prisma.$queryRawUnsafe.mock.calls[1][0];
-    expect(firstCall).toBe("DELETE FROM task_fts");
-    expect(secondCall).toContain("INSERT INTO task_fts");
+    expect(calls.length).toBe(2);
+    expect(calls[0][0]).toBe("DELETE FROM task_fts");
+    expect(calls[1][0]).toContain("INSERT INTO task_fts");
   });
 });
