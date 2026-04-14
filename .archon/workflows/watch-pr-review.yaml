@@ -52,8 +52,14 @@ nodes:
       For each unresolved comment:
       1. Understand the feedback
       2. If it requires a code change, make the change
-      3. Reply to the comment using: gh api repos/{owner}/{repo}/pulls/$PR/comments/{id}/replies --method POST -f body="..."
-      4. If the comment is on a review, reply appropriately
+      3. Reply to the comment using:
+         gh api repos/{owner}/{repo}/pulls/{pr}/comments --method POST -F in_reply_to={comment_id} -f body="..."
+      4. Resolve the conversation thread using GraphQL:
+         First get the thread ID:
+         gh api graphql -f query='{ repository(owner:"{owner}", name:"{repo}") { pullRequest(number:{pr}) { reviewThreads(first:100) { nodes { id isResolved comments(first:1) { nodes { databaseId } } } } } } }' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.comments.nodes[0].databaseId == {comment_id}) | .id'
+         Then resolve it:
+         gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "THREAD_ID"}) { thread { isResolved } } }'
+      5. IMPORTANT: Always resolve after replying. Unresolved threads signal outstanding feedback.
 
       If there are no comments to address, say "No pending comments."
       After addressing all comments, commit any changes and push.
