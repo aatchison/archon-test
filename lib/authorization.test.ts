@@ -11,14 +11,20 @@ const mockMemberFindUnique = spyOn({ fn: async () => ({}) }, "fn");
 mock.module("@/lib/db", () => ({
   db: {
     list: { findUnique: (...args: unknown[]) => mockListFindUnique(...args) },
-    listMember: { findUnique: (...args: unknown[]) => mockMemberFindUnique(...args) },
+    listMember: {
+      findUnique: (...args: unknown[]) => mockMemberFindUnique(...args),
+    },
   },
 }));
 
-const { isOwner, canEdit, canView, requireOwner, requireEdit, requireView } = await import("./authorization");
+const { isOwner, canEdit, canView, requireOwner, requireEdit, requireView } =
+  await import("./authorization");
 
 describe("isOwner", () => {
-  beforeEach(() => { mockListFindUnique.mockReset(); mockMemberFindUnique.mockReset(); });
+  beforeEach(() => {
+    mockListFindUnique.mockReset();
+    mockMemberFindUnique.mockReset();
+  });
 
   it("returns true for owner", async () => {
     mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
@@ -32,7 +38,10 @@ describe("isOwner", () => {
 });
 
 describe("canEdit", () => {
-  beforeEach(() => { mockListFindUnique.mockReset(); mockMemberFindUnique.mockReset(); });
+  beforeEach(() => {
+    mockListFindUnique.mockReset();
+    mockMemberFindUnique.mockReset();
+  });
 
   it("returns true for owner", async () => {
     mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
@@ -59,7 +68,10 @@ describe("canEdit", () => {
 });
 
 describe("canView", () => {
-  beforeEach(() => { mockListFindUnique.mockReset(); mockMemberFindUnique.mockReset(); });
+  beforeEach(() => {
+    mockListFindUnique.mockReset();
+    mockMemberFindUnique.mockReset();
+  });
 
   it("returns true for owner", async () => {
     mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
@@ -86,7 +98,9 @@ describe("canView", () => {
 });
 
 describe("requireOwner", () => {
-  beforeEach(() => { mockListFindUnique.mockReset(); });
+  beforeEach(() => {
+    mockListFindUnique.mockReset();
+  });
 
   it("returns userId for owner", async () => {
     mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
@@ -100,7 +114,10 @@ describe("requireOwner", () => {
 });
 
 describe("requireEdit", () => {
-  beforeEach(() => { mockListFindUnique.mockReset(); mockMemberFindUnique.mockReset(); });
+  beforeEach(() => {
+    mockListFindUnique.mockReset();
+    mockMemberFindUnique.mockReset();
+  });
 
   it("returns userId for owner", async () => {
     mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
@@ -127,7 +144,10 @@ describe("requireEdit", () => {
 });
 
 describe("requireView", () => {
-  beforeEach(() => { mockListFindUnique.mockReset(); mockMemberFindUnique.mockReset(); });
+  beforeEach(() => {
+    mockListFindUnique.mockReset();
+    mockMemberFindUnique.mockReset();
+  });
 
   it("returns userId for owner", async () => {
     mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });

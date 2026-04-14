@@ -9,7 +9,7 @@ export function MemberList({
   isOwner,
 }: {
   members: Array<{
-    user: { id: string; name: string; email: string };
+    user: { id: string; name: string | null; email: string };
     role: string;
     listId: string;
     userId: string;
@@ -37,7 +37,11 @@ export function MemberList({
               <select
                 value={member.role}
                 onChange={async (e) => {
-                  await updateMemberRole(listId, member.userId, e.target.value);
+                  await updateMemberRole(
+                    listId,
+                    member.userId,
+                    e.target.value as "EDITOR" | "VIEWER",
+                  );
                 }}
                 className="border rounded px-1 py-1 text-xs"
               >

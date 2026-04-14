@@ -45,6 +45,7 @@ export default async function ListPage({
   });
 
   if (!(await canView(id))) notFound();
+  if (!list) notFound();
   const userCanEdit = await canEdit(id);
 
   type TaskWithList = (typeof list.tasks)[number];

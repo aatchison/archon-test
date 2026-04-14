@@ -43,22 +43,34 @@ describe("addMember", () => {
   });
 
   it("throws if role is invalid", async () => {
-    await expect(addMember("l1", "test@example.com", "OWNER")).rejects.toThrow();
+    await expect(
+      addMember("l1", "test@example.com", "OWNER"),
+    ).rejects.toThrow();
   });
 
   it("throws if user not found", async () => {
     mockUserFindUnique.mockResolvedValue(null);
-    await expect(addMember("l1", "nobody@example.com", "EDITOR")).rejects.toThrow("not found");
+    await expect(
+      addMember("l1", "nobody@example.com", "EDITOR"),
+    ).rejects.toThrow("not found");
   });
 
   it("throws if already a member", async () => {
-    mockUserFindUnique.mockResolvedValue({ id: "u2", email: "test@example.com" });
+    mockUserFindUnique.mockResolvedValue({
+      id: "u2",
+      email: "test@example.com",
+    });
     mockMemberFindUnique.mockResolvedValue({ listId: "l1", userId: "u2" });
-    await expect(addMember("l1", "test@example.com", "EDITOR")).rejects.toThrow("already");
+    await expect(addMember("l1", "test@example.com", "EDITOR")).rejects.toThrow(
+      "already",
+    );
   });
 
   it("creates the member", async () => {
-    mockUserFindUnique.mockResolvedValue({ id: "u2", email: "test@example.com" });
+    mockUserFindUnique.mockResolvedValue({
+      id: "u2",
+      email: "test@example.com",
+    });
     mockMemberFindUnique.mockResolvedValue(null);
     mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
     mockMemberCreate.mockResolvedValue({});
@@ -100,7 +112,9 @@ describe("updateMemberRole", () => {
 
   it("throws if target is owner", async () => {
     mockListFindUnique.mockResolvedValue({ ownerId: "u2" });
-    await expect(updateMemberRole("l1", "u2", "EDITOR")).rejects.toThrow("owner");
+    await expect(updateMemberRole("l1", "u2", "EDITOR")).rejects.toThrow(
+      "owner",
+    );
   });
 
   it("updates the role", async () => {

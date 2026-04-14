@@ -12,7 +12,7 @@ export function InviteForm({ listId }: { listId: string }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await addMember(listId, email, role);
+      await addMember(listId, email, role as "EDITOR" | "VIEWER");
       setEmail("");
     } catch (error) {
       console.error(error);

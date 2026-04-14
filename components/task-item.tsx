@@ -26,9 +26,14 @@ interface Task {
 interface TaskItemProps {
   task: Task;
   allLabels: Label[];
+  canEdit?: boolean;
 }
 
-export default function TaskItem({ task, allLabels }: TaskItemProps) {
+export default function TaskItem({
+  task,
+  allLabels,
+  canEdit = true,
+}: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   const priorityColors: Record<string, string> = {
@@ -56,13 +61,19 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
               }
             }}
           />
-          <button
-            type="button"
-            className={`cursor-pointer text-left bg-transparent border-none p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${task.done ? "line-through text-gray-500" : ""}`}
-            onClick={() => setIsEditing(true)}
-          >
-            {task.title}
-          </button>
+          {canEdit ? (
+            <button
+              type="button"
+              className={`cursor-pointer text-left bg-transparent border-none p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${task.done ? "line-through text-gray-500" : ""}`}
+              onClick={() => setIsEditing(true)}
+            >
+              {task.title}
+            </button>
+          ) : (
+            <span className={task.done ? "line-through text-gray-500" : ""}>
+              {task.title}
+            </span>
+          )}
           {task.priority !== "NONE" && (
             <span
               className={`text-xs px-2 py-1 rounded ${priorityColors[task.priority]}`}
@@ -85,19 +96,21 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
             </span>
           )}
         </div>
-        <button
-          type="button"
-          onClick={async () => {
-            try {
-              await deleteTask(task.id);
-            } catch (error) {
-              console.error("Failed to delete task:", error);
-            }
-          }}
-          className="text-red-500 hover:text-red-700"
-        >
-          Delete
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await deleteTask(task.id);
+              } catch (error) {
+                console.error("Failed to delete task:", error);
+              }
+            }}
+            className="text-red-500 hover:text-red-700"
+          >
+            Delete
+          </button>
+        )}
       </div>
       {isEditing && (
         <div className="px-2 pb-4">
