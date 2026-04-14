@@ -31,22 +31,8 @@ export async function isOwner(listId: string): Promise<boolean> {
 
 export async function canEdit(listId: string): Promise<boolean> {
   try {
-    const userId = await getCurrentUserId();
-    const list = await db.list.findUnique({
-      where: { id: listId },
-      select: { ownerId: true },
-    });
-
-    if (list?.ownerId === userId) return true;
-
-    const member = await db.listMember.findUnique({
-      where: {
-        listId_userId: { listId, userId },
-      },
-      select: { role: true },
-    });
-
-    return member?.role === "EDITOR";
+    await requireEdit(listId);
+    return true;
   } catch {
     return false;
   }
@@ -54,21 +40,8 @@ export async function canEdit(listId: string): Promise<boolean> {
 
 export async function canView(listId: string): Promise<boolean> {
   try {
-    const userId = await getCurrentUserId();
-    const list = await db.list.findUnique({
-      where: { id: listId },
-      select: { ownerId: true },
-    });
-
-    if (list?.ownerId === userId) return true;
-
-    const member = await db.listMember.findUnique({
-      where: {
-        listId_userId: { listId, userId },
-      },
-    });
-
-    return !!member;
+    await requireView(listId);
+    return true;
   } catch {
     return false;
   }

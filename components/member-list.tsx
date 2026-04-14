@@ -35,6 +35,7 @@ export function MemberList({
           {isOwner && member.role !== "OWNER" && (
             <div className="flex items-center gap-2">
               <select
+                aria-label={`Change role for ${member.user.name || member.user.email}`}
                 value={member.role}
                 onChange={async (e) => {
                   await updateMemberRole(

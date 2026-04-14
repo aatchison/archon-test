@@ -51,6 +51,7 @@ export async function addMember(
 }
 
 export async function removeMember(listId: string, userId: string) {
+  if (!userId) throw new Error("User ID is required");
   await requireOwner(listId);
 
   const list = await db.list.findUnique({
@@ -77,6 +78,7 @@ export async function updateMemberRole(
   userId: string,
   role: "EDITOR" | "VIEWER",
 ) {
+  if (!userId) throw new Error("User ID is required");
   await requireOwner(listId);
 
   if (role !== "EDITOR" && role !== "VIEWER") throw new Error("Invalid role");

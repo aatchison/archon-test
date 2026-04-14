@@ -17,6 +17,7 @@ export default async function ListMembersPage({
   const list = await db.list.findUnique({
     where: { id },
     include: {
+      owner: { select: { id: true, name: true, email: true } },
       members: {
         include: {
           user: true,
@@ -37,9 +38,9 @@ export default async function ListMembersPage({
       userId: list.ownerId,
       role: "OWNER",
       user: {
-        id: list.ownerId,
-        name: "Owner", // In a real app, you'd fetch the owner's user details
-        email: "Owner",
+        id: list.owner.id,
+        name: list.owner.name,
+        email: list.owner.email ?? "Owner",
       },
       listId: list.id,
     },
@@ -51,7 +52,7 @@ export default async function ListMembersPage({
       <div>
         <h1 className="text-2xl font-bold mb-2">Manage Members</h1>
         <p className="text-gray-500 text-sm">
-          Invite and manage collaborators for this list.
+          Invite and manage members for this list.
         </p>
       </div>
 
