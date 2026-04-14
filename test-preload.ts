@@ -28,4 +28,14 @@ if (!process.env.INTEGRATION_TEST) {
     signIn: async () => {},
     signOut: async () => {},
   }));
+
+  // Mock authorization helpers — default to allowing everything in unit tests
+  mock.module("@/lib/authorization", () => ({
+    isOwner: async () => true,
+    canEdit: async () => true,
+    canView: async () => true,
+    requireOwner: async () => "test-user",
+    requireEdit: async () => "test-user",
+    requireView: async () => "test-user",
+  }));
 }

@@ -32,6 +32,11 @@ mock.module("@/lib/db", () => ({
 }));
 mock.module("next/cache", () => ({ revalidatePath: () => {} }));
 
+const mockRequireEdit = spyOn({ fn: async () => "user-1" }, "fn");
+mock.module("@/lib/authorization", () => ({
+  requireEdit: (...args: unknown[]) => mockRequireEdit(...args),
+}));
+
 const {
   createLabel,
   updateLabel,
@@ -108,17 +113,16 @@ describe("deleteLabel", () => {
 
 describe("addLabelToTask", () => {
   beforeEach(() => {
+    mockRequireEdit.mockReset().mockResolvedValue("user-1");
     mockTaskFindUnique.mockReset();
     mockLabelFindUnique.mockReset();
     mockTaskLabelCreate.mockReset();
   });
 
-  it("throws if task belongs to another user", async () => {
-    mockTaskFindUnique.mockResolvedValue({
-      ...mockTask,
-      list: { id: "l1", ownerId: "other" },
-    });
-    await expect(addLabelToTask("t1", "lb1")).rejects.toThrow();
+  it("throws if not authorized to edit list", async () => {
+    mockTaskFindUnique.mockResolvedValue(mockTask);
+    mockRequireEdit.mockRejectedValue(new Error("Not found"));
+    await expect(addLabelToTask("t1", "lb1")).rejects.toThrow("Not found");
   });
 
   it("creates the task-label association", async () => {
@@ -134,6 +138,7 @@ describe("addLabelToTask", () => {
 
 describe("removeLabelFromTask", () => {
   beforeEach(() => {
+    mockRequireEdit.mockReset().mockResolvedValue("user-1");
     mockTaskFindUnique.mockReset();
     mockTaskLabelDelete.mockReset();
   });
