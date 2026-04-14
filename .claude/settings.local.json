@@ -30,7 +30,11 @@
       "Bash(opencode run:*)",
       "Bash(opencode models:*)",
       "Bash(archon validate:*)",
+<<<<<<< Updated upstream
       "Bash(.archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 2 'Apply the following 5 fixes in order. Read each file before modifying.:*)"
+=======
+      "Bash(docker exec:*)"
+>>>>>>> Stashed changes
     ]
   }
 }
