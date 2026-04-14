@@ -125,7 +125,7 @@ archon workflow run update-pr-evidence
 
 ## Local Model Usage
 
-Mechanical tasks are delegated to a local Gemma model via [opencode](https://opencode.ai), keeping Claude focused on coordination and review.
+Mechanical tasks are delegated to a local Gemma model via [opencode](https://opencode.ai), keeping Claude focused on coordination and review. See [`docs/token-usage.md`](docs/token-usage.md) for a breakdown of model usage across all sub-projects.
 
 ### Division of Labor
 
