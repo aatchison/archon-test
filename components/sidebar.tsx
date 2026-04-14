@@ -15,6 +15,9 @@ export default function Sidebar({
         <Link href="/lists" className="block p-2 hover:bg-gray-200 rounded">
           All lists
         </Link>
+        <Link href="/labels" className="block p-2 hover:bg-gray-200 rounded">
+          Labels
+        </Link>
         <div className="pt-4 space-y-1">
           {lists.length === 0 ? (
             <p className="text-sm text-gray-500">No lists yet</p>

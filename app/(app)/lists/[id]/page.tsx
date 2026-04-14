@@ -4,20 +4,42 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import TaskItem from "@/components/task-item";
 import TaskForm from "@/components/task-form";
+import { buildTaskWhere } from "@/lib/filters";
+import { TaskFilters } from "@/components/task-filters";
 
 export default async function ListPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
   const { id } = await params;
+  const searchParamsData = await searchParams;
+
+  const allLabels = await db.label.findMany({
+    where: { userId: session.user.id },
+    orderBy: { name: "asc" },
+  });
+
+  const priority = searchParamsData.priority as string | undefined;
+  const label = searchParamsData.label as string | string[] | undefined;
+  const due = searchParamsData.due as string | undefined;
+  const status = searchParamsData.status as string | undefined;
+
+  const where = buildTaskWhere(id, { priority, label, due, status });
+
   const list = await db.list.findUnique({
     where: { id },
     include: {
-      tasks: { orderBy: [{ done: "asc" }, { createdAt: "asc" }] },
+      tasks: {
+        where,
+        orderBy: [{ done: "asc" }, { createdAt: "asc" }],
+        include: { labels: { include: { label: true } } },
+      },
     },
   });
 
@@ -38,17 +60,33 @@ export default async function ListPage({
           Settings
         </Link>
       </div>
+      <TaskFilters
+        currentFilters={{
+          priority,
+          label: Array.isArray(label) ? label : label ? [label] : undefined,
+          due,
+          status,
+        }}
+      />
       <TaskForm listId={list.id} />
       <div className="mt-4 space-y-1">
         {pending.map((task: TaskWithList) => (
-          <TaskItem key={task.id} task={task} />
+          <TaskItem
+            key={task.id}
+            task={{ ...task, labels: task.labels.map((tl) => tl.label) }}
+            allLabels={allLabels}
+          />
         ))}
         {done.length > 0 && (
           <>
             <div className="border-t my-4" />
             <p className="text-xs text-gray-400 mb-2 px-3">Completed</p>
             {done.map((task: TaskWithList) => (
-              <TaskItem key={task.id} task={task} />
+              <TaskItem
+                key={task.id}
+                task={{ ...task, labels: task.labels.map((tl) => tl.label) }}
+                allLabels={allLabels}
+              />
             ))}
           </>
         )}

@@ -46,3 +46,25 @@ Tracks Claude vs Gemma (opencode) token usage during todo app foundation impleme
 - Common Gemma issues: wrong field names, importing non-existent functions, using wrong APIs (zod, vitest)
 - Gemma excels at: file creation from clear specs, config, simple component implementation
 - Claude essential for: test infrastructure, Prisma 7 adapter setup, fixing Gemma's field/import errors
+
+## Sub-project 2: Core Task Management
+
+| Task | Model | Approx Tokens | Notes |
+|------|-------|---------------|-------|
+| Task 1: Label Server Actions | Gemma (vllm-31b) | ~4k | Clean execution |
+| Task 2: Label action tests | Claude (sonnet) | ~3k | Wrote bun:test mocks directly |
+| Task 3: LabelBadge + tests | Gemma + Claude | ~4k | Gemma component, Claude tests |
+| Task 4: ColorPicker + LabelForm + LabelPicker | Gemma (vllm-31b) | ~8k | 3 components in one batch, LSP fixes |
+| Task 5: Labels page + sidebar | Gemma (vllm-31b) | ~5k | Clean execution |
+| Task 6: LabelPicker | (included in Task 4) | — | Batched with Task 4 |
+| Task 7: TaskEditForm | Gemma (vllm-31b) | ~5k | LSP label association warnings |
+| Task 8: Update TaskItem | Gemma (vllm-31b) | ~6k | Accessibility fixes (button types, keyboard) |
+| Task 9: Filter utilities | Gemma (vllm-31b) | ~3k | Clean execution |
+| Sub-issue creation | Claude (sonnet) | ~2k | Created #29-#41, linked to #28 |
+
+### Sub-project 2 Running Totals (so far)
+
+| Model | Estimated Tokens | Tasks |
+|-------|-----------------|-------|
+| Gemma (vllm-31b) | ~35k | 8 runs |
+| Claude (sonnet) | ~5k | 2 actions |
