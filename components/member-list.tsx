@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { RoleBadge } from "./role-badge";
 import { updateMemberRole, removeMember } from "@/actions/members";
 
@@ -17,8 +18,15 @@ export function MemberList({
   listId: string;
   isOwner: boolean;
 }) {
+  const [error, setError] = useState<string | null>(null);
+
   return (
     <div className="space-y-2">
+      {error && (
+        <p className="text-red-600 text-sm" role="alert">
+          {error}
+        </p>
+      )}
       {members.map((member) => (
         <div
           key={member.userId}
@@ -38,11 +46,20 @@ export function MemberList({
                 aria-label={`Change role for ${member.user.name || member.user.email}`}
                 value={member.role}
                 onChange={async (e) => {
-                  await updateMemberRole(
-                    listId,
-                    member.userId,
-                    e.target.value as "EDITOR" | "VIEWER",
-                  );
+                  try {
+                    setError(null);
+                    await updateMemberRole(
+                      listId,
+                      member.userId,
+                      e.target.value as "EDITOR" | "VIEWER",
+                    );
+                  } catch (err) {
+                    setError(
+                      err instanceof Error
+                        ? err.message
+                        : "Failed to update role",
+                    );
+                  }
                 }}
                 className="border rounded px-1 py-1 text-xs"
               >
@@ -52,7 +69,16 @@ export function MemberList({
               <button
                 type="button"
                 onClick={async () => {
-                  await removeMember(listId, member.userId);
+                  try {
+                    setError(null);
+                    await removeMember(listId, member.userId);
+                  } catch (err) {
+                    setError(
+                      err instanceof Error
+                        ? err.message
+                        : "Failed to remove member",
+                    );
+                  }
                 }}
                 className="text-red-600 text-xs font-medium hover:underline"
               >

@@ -7,22 +7,30 @@ export function InviteForm({ listId }: { listId: string }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("EDITOR");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       await addMember(listId, email, role as "EDITOR" | "VIEWER");
       setEmail("");
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to invite member");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+    <form onSubmit={handleSubmit} className="space-y-2">
+      {error && (
+        <p className="text-red-600 text-sm" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="flex gap-2 items-end">
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium">
           Email
@@ -57,6 +65,7 @@ export function InviteForm({ listId }: { listId: string }) {
       >
         {loading ? "Inviting..." : "Invite"}
       </button>
+      </div>
     </form>
   );
 }

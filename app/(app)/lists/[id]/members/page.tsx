@@ -36,7 +36,7 @@ export default async function ListMembersPage({
   const membersWithOwner = [
     {
       userId: list.ownerId,
-      role: "OWNER",
+      role: "OWNER" as const,
       user: {
         id: list.owner.id,
         name: list.owner.name,
