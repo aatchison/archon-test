@@ -137,19 +137,37 @@ Tracks Claude vs Gemma (opencode) token usage during todo app foundation impleme
 | 6-perspective Gemma plan review | Gemma (vllm-31b) | ~30k | ~3min | Correctness, testing, architecture, security, DX, performance |
 | Plan fixes from Gemma review | Claude (opus) | ~8k | ~5min | 6 issues fixed: stale presence, rate limit, BC misuse, auto-hide, maxListeners |
 
-### Sub-project 4 Design+Planning Running Totals
+### Sub-project 4 Implementation
+
+| Task | Model | Approx Tokens | Time | Notes |
+|------|-------|---------------|------|-------|
+| Tasks 1-3 (Wave 1) | Gemma (vllm-31b) | ~15k | ~5min | Types, config, migration, EventHub — sequential |
+| Tasks 4-7 (Wave 2) | Gemma (vllm-31b) | ~20k | ~5min | Server actions, SSE route, transport — parallel pairs |
+| Task 4 test-preload fix | Claude (opus) | ~3k | ~1min | Added event-hub + ConflictError mocks |
+| Task 5 renameList test fix | Claude (opus) | ~2k | ~1min | findUnique mock for updated list |
+| Tasks 8-10 (Wave 3) | Gemma (vllm-31b) | ~15k | ~5min | useEventSource, usePresence, useTaskList, UI components |
+| Task 9 .tsx rename | Gemma (vllm-31b) | ~2k | ~1min | git mv use-task-list.ts → .tsx |
+| Task 11: TaskItem optimistic UI | Gemma (vllm-31b) | ~5k | ~2min | Clean execution, 5/5 tests pass |
+| Task 11 spec review | Gemma (vllm-31b) | ~3k | ~1min | PASS |
+| Task 11 code review | Gemma (vllm-31b) | ~3k | ~1min | Found 4 issues: a11y, memo, type safety |
+| Task 11 a11y fix | Claude (opus) | ~1k | ~30s | Added aria-label to Delete button |
+| Task 12: Wire Up List Page | Claude (opus) | ~5k | ~2min | Gemma timed out (prompt too long), done directly |
+| Task 12 spec review | Gemma (vllm-31b) | ~3k | ~1min | PASS |
+| Task 12 code review | Gemma (vllm-31b) | ~3k | ~1min | Found 4 issues: perf, a11y, type safety |
+
+### Sub-project 4 Running Totals (Design + Implementation so far)
 
 | Model | Estimated Tokens | Tasks |
 |-------|-----------------|-------|
-| Gemma (vllm-31b) | ~106k | 19 review/research runs |
-| Claude (opus) | ~51k | 9 actions |
+| Gemma (vllm-31b) | ~175k | 33 runs |
+| Claude (opus) | ~62k | 13 actions |
 
 ## Grand Totals (All Sub-projects)
 
 | Model | Estimated Tokens | Task Count | Notes |
 |-------|-----------------|------------|-------|
-| Gemma (vllm-31b) | ~369k+ | 71+ runs | Reviews, research, mechanical implementation |
+| Gemma (vllm-31b) | ~438k+ | 85+ runs | Reviews, research, mechanical implementation |
 | Claude (sonnet) | ~99k | 33 actions | Coordination, reviews, fixes, test design |
-| Claude (opus) | ~76k | 14 actions | Design, plans, workflow improvements, spec writing |
+| Claude (opus) | ~87k | 18 actions | Design, plans, implementation, spec writing |
 | Claude (haiku) | ~2k | 1 review | Spec compliance check |
-| **Total** | **~546k+** | **119+ actions** | **68% Gemma, 18% Claude sonnet, 14% Claude opus** |
+| **Total** | **~626k+** | **137+ actions** | **70% Gemma, 16% Claude sonnet, 14% Claude opus** |

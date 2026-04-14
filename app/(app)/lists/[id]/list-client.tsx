@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import TaskItem from "@/components/task-item";
 import TaskForm from "@/components/task-form";
 import { TaskFilters } from "@/components/task-filters";
@@ -52,17 +54,27 @@ function ListContent({
   } = useTaskList();
   const { viewers, handlePresenceChanged } = usePresence(currentUserId);
 
-  const eventHandlers = {
-    "task:created": handleTaskEvent,
-    "task:updated": handleTaskEvent,
-    "task:deleted": handleTaskEvent,
-    "presence:changed": handlePresenceChanged,
-  } as Record<string, (envelope: HubEventEnvelope) => void>;
+  const eventHandlers = useMemo(
+    () =>
+      ({
+        "task:created": handleTaskEvent,
+        "task:updated": handleTaskEvent,
+        "task:deleted": handleTaskEvent,
+        "presence:changed": handlePresenceChanged,
+      }) as Record<string, (envelope: HubEventEnvelope) => void>,
+    [handleTaskEvent, handlePresenceChanged],
+  );
 
   const { status } = useEventSource(listId, currentUserId, eventHandlers);
 
-  const pending = optimisticTasks.filter((t) => !t.done);
-  const done = optimisticTasks.filter((t) => t.done);
+  const pending = useMemo(
+    () => optimisticTasks.filter((t) => !t.done),
+    [optimisticTasks],
+  );
+  const done = useMemo(
+    () => optimisticTasks.filter((t) => t.done),
+    [optimisticTasks],
+  );
 
   return (
     <div className="max-w-2xl">
@@ -72,12 +84,12 @@ function ListContent({
           <PresenceIndicator viewers={viewers} />
           <ConnectionStatus status={status} />
         </div>
-        <a
+        <Link
           href={`/lists/${listId}/settings`}
           className="text-sm text-gray-400 hover:text-gray-900"
         >
           Settings
-        </a>
+        </Link>
       </div>
       <TaskFilters currentFilters={currentFilters} />
       {canEdit && <TaskForm listId={listId} />}
