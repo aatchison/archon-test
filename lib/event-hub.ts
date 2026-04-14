@@ -79,28 +79,6 @@ class EventHubImpl {
     this.publish(listId, envelope);
   }
 
-  private resetPresenceTimer(listId: string, userId: string): void {
-    const key = `${listId}:${userId}`;
-    this.clearPresenceTimer(listId, userId);
-    this.presenceTimers.set(
-      key,
-      setTimeout(() => {
-        this.presence.get(listId)?.delete(userId);
-        this.presenceTimers.delete(key);
-        this.publishPresenceChanged(listId, userId);
-      }, REALTIME_CONFIG.presenceTimeoutMs),
-    );
-  }
-
-  private clearPresenceTimer(listId: string, userId: string): void {
-    const key = `${listId}:${userId}`;
-    const timer = this.presenceTimers.get(key);
-    if (timer) {
-      clearTimeout(timer);
-      this.presenceTimers.delete(key);
-    }
-  }
-
   reset(): void {
     this.emitter.removeAllListeners();
     this.subscribers.clear();
