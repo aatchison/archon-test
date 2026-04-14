@@ -62,9 +62,50 @@ Tracks Claude vs Gemma (opencode) token usage during todo app foundation impleme
 | Task 9: Filter utilities | Gemma (vllm-31b) | ~3k | Clean execution |
 | Sub-issue creation | Claude (sonnet) | ~2k | Created #29-#41, linked to #28 |
 
-### Sub-project 2 Running Totals (so far)
+### Sub-project 2 Running Totals
 
 | Model | Estimated Tokens | Tasks |
 |-------|-----------------|-------|
 | Gemma (vllm-31b) | ~35k | 8 runs |
 | Claude (sonnet) | ~5k | 2 actions |
+
+## Sub-project 3: Collaboration
+
+| Task | Model | Approx Tokens | Time | Notes |
+|------|-------|---------------|------|-------|
+| Task 1: Authorization helpers | Claude (sonnet) | ~6k | ~3min | lib/authorization.ts — 6 functions |
+| Task 2: Authorization tests | Claude (sonnet) | ~4k | ~2min | 19 unit tests, INTEGRATION_TEST flag |
+| Task 3: Refactor lists actions | Claude (sonnet) | ~2k | ~1min | requireOwner for rename/delete |
+| Task 4: Refactor tasks actions | Claude (sonnet) | ~3k | ~2min | requireEdit for all mutations |
+| Task 5: Refactor labels actions | Claude (sonnet) | ~2k | ~1min | requireEdit for label-task ops |
+| Task 6: Lists/tasks test updates | Claude (sonnet) | ~3k | ~2min | Mock authorization in tests |
+| Task 7: Member actions | Claude (sonnet) | ~4k | ~2min | addMember, removeMember, updateRole |
+| Task 8: Member action tests | Claude (sonnet) | ~4k | ~2min | 10 unit tests |
+| Task 9: Member integration test | Claude (sonnet) | ~3k | ~2min | 1 integration test |
+| Task 10: RoleBadge + tests | Claude (sonnet) | ~2k | ~1min | Component + 3 tests |
+| Task 11: InviteForm | Claude (sonnet) | ~2k | ~1min | Email + role form |
+| Task 12: MemberList | Claude (sonnet) | ~3k | ~1min | List with role management |
+| Task 13: Members page | Claude (sonnet) | ~3k | ~2min | Owner-only page |
+| Task 14: Sidebar + list page | Claude (sonnet) | ~3k | ~2min | Shared lists, canEdit/canView |
+| Sub-issue creation | Claude (sonnet) | ~2k | ~1min | Created sub-issues for #57 |
+| Gemma review round 1 | Gemma (vllm-31b) | ~50k | ~3min | 10 perspectives, 6 actionable issues |
+| Round 1 fixes | Claude (sonnet) | ~3k | ~2min | aria-label, userId validation, dedup |
+| Gemma review round 2 | Gemma (vllm-31b) | ~50k | ~4min | 10 perspectives, 2 actionable issues |
+| Round 2 fixes | Claude (sonnet) | ~2k | ~1min | Error feedback, type assertions |
+| Gemma review round 3+ | Gemma (vllm-31b) | ~20k+ | ongoing | Convergence check |
+
+### Sub-project 3 Running Totals (so far)
+
+| Model | Estimated Tokens | Tasks |
+|-------|-----------------|-------|
+| Gemma (vllm-31b) | ~120k+ | 22+ review runs |
+| Claude (sonnet) | ~49k | 17 actions |
+
+## Grand Totals (All Sub-projects)
+
+| Model | Estimated Tokens | Task Count | Notes |
+|-------|-----------------|------------|-------|
+| Gemma (vllm-31b) | ~213k+ | 42+ runs | Reviews, mechanical implementation |
+| Claude (sonnet) | ~99k | 33 actions | Coordination, reviews, fixes, test design |
+| Claude (haiku) | ~2k | 1 review | Spec compliance check |
+| **Total** | **~314k+** | **76+ actions** | **68% Gemma, 31% Claude sonnet, 1% haiku** |
