@@ -41,7 +41,9 @@ nodes:
       fi
       echo ""
       echo "=== Memory Index ==="
-      MEMORY_DIR=$(find ~/.claude/projects -name MEMORY.md -path "*archon-test*" 2>/dev/null | head -1)
+      # Derive project memory path from current working directory
+      PROJECT_KEY=$(pwd | sed 's|/|-|g; s|^-||')
+      MEMORY_DIR=$(find ~/.claude/projects -name MEMORY.md -path "*${PROJECT_KEY}*" 2>/dev/null | head -1)
       if [ -n "$MEMORY_DIR" ]; then
         cat "$MEMORY_DIR"
       else

@@ -15,9 +15,8 @@ COMMENT_ID="${2:?Usage: resolve-pr-threads.sh <pr_number> <comment_id> <reply_bo
 REPLY_BODY="${3:?Usage: resolve-pr-threads.sh <pr_number> <comment_id> <reply_body>}"
 
 # Get owner/repo from current git remote
-REPO=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
-OWNER=$(echo "$REPO" | cut -d/ -f1)
-NAME=$(echo "$REPO" | cut -d/ -f2)
+REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+IFS='/' read -r OWNER NAME <<< "$REPO"
 
 echo ">>> Replying to comment $COMMENT_ID on PR #$PR..."
 gh api "repos/$REPO/pulls/$PR/comments" \
@@ -28,8 +27,8 @@ gh api "repos/$REPO/pulls/$PR/comments" \
 
 echo ">>> Finding thread ID for comment $COMMENT_ID..."
 THREAD_ID=$(gh api graphql -f query="
-  { repository(owner:\"$OWNER\", name:\"$NAME\") {
-    pullRequest(number:$PR) {
+  { repository(owner:\"${OWNER}\", name:\"${NAME}\") {
+    pullRequest(number:${PR}) {
       reviewThreads(first:100) {
         nodes {
           id
