@@ -41,23 +41,22 @@ describe("searchTasks", () => {
   });
 
   it("calls $queryRawUnsafe with MATCH and userId params", async () => {
-    const calls: any[][] = [];
-    const queryRaw = (...args: any[]) => {
-      calls.push(args);
+    const queryRaw = mock((...args: any[]) => {
       return Promise.resolve([{ cnt: 1 }]);
+    });
+    const prisma = { 
+      $queryRawUnsafe: queryRaw,
     };
-    const prisma = { $queryRawUnsafe: queryRaw };
+    
     await searchTasks(prisma as any, "user1", "test");
 
-    // Count query should have been called
-    expect(calls.length).toBeGreaterThanOrEqual(1);
-    expect(calls[0][0]).toContain("COUNT");
-    expect(calls[0][0]).toContain("MATCH");
-    // FTS query param
-    expect(calls[0][1]).toBe('"test"*');
-    // userId params
-    expect(calls[0][2]).toBe("user1");
-    expect(calls[0][3]).toBe("user1");
+    expect(queryRaw).toHaveBeenCalled();
+    const firstCall = queryRaw.mock.calls[0];
+    expect(firstCall[0]).toContain("COUNT");
+    expect(firstCall[0]).toContain("MATCH");
+    expect(firstCall[1]).toBe('"test"*');
+    expect(firstCall[2]).toBe("user1");
+    expect(firstCall[3]).toBe("user1");
   });
 });
 
