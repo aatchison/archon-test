@@ -26,6 +26,7 @@ export interface TaskPayload {
   dueDate: string | null;
   listId: string;
   version: number;
+  labels: { id: string; name: string; color: string }[];
 }
 
 export interface ListPayload {

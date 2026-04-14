@@ -4,14 +4,8 @@ import { requireOwner } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { eventHub } from "@/lib/event-hub";
-import { auth } from "@/lib/auth";
+import { auth, getUserId } from "@/lib/auth";
 import { EVENT_TYPES } from "@/lib/realtime-types";
-
-async function getUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-  return session.user.id;
-}
 
 export async function addMember(
   listId: string,

@@ -37,6 +37,7 @@ if (!process.env.INTEGRATION_TEST) {
 
   mock.module("@/lib/auth", () => ({
     auth: async () => ({ user: { id: "test-user" } }),
+    getUserId: async () => "test-user",
     signIn: async () => {},
     signOut: async () => {},
   }));

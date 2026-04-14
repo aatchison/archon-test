@@ -12,13 +12,17 @@ class EventHubImpl {
   private emitter = new EventEmitter();
   private subscribers = new Map<string, Subscriber[]>();
   private presence = new Map<string, Map<string, string>>();
-  private presenceTimers = new Map<string, NodeJS.Timeout>();
 
   constructor() {
     this.emitter.setMaxListeners(100);
   }
 
-  subscribe(listId: string, userId: string, userName: string, callback: (envelope: HubEventEnvelope) => void): () => void {
+  subscribe(
+    listId: string,
+    userId: string,
+    userName: string,
+    callback: (envelope: HubEventEnvelope) => void,
+  ): () => void {
     const subscriber: Subscriber = { userId, userName, callback };
     if (!this.subscribers.has(listId)) this.subscribers.set(listId, []);
     this.subscribers.get(listId)!.push(subscriber);
@@ -27,7 +31,6 @@ class EventHubImpl {
     const handler = (envelope: HubEventEnvelope) => callback(envelope);
     this.emitter.on(`list:${listId}`, handler);
     this.publishPresenceChanged(listId, userId);
-    this.resetPresenceTimer(listId, userId);
     return () => {
       this.emitter.off(`list:${listId}`, handler);
       const subs = this.subscribers.get(listId);
@@ -37,7 +40,6 @@ class EventHubImpl {
         const hasOtherSubs = subs.some((s) => s.userId === userId);
         if (!hasOtherSubs) {
           this.presence.get(listId)?.delete(userId);
-          this.clearPresenceTimer(listId, userId);
         }
       }
       this.publishPresenceChanged(listId, userId);
@@ -57,7 +59,10 @@ class EventHubImpl {
   getPresence(listId: string): { userId: string; userName: string }[] {
     const presenceMap = this.presence.get(listId);
     if (!presenceMap) return [];
-    return Array.from(presenceMap.entries()).map(([userId, userName]) => ({ userId, userName }));
+    return Array.from(presenceMap.entries()).map(([userId, userName]) => ({
+      userId,
+      userName,
+    }));
   }
 
   private publishPresenceChanged(listId: string, triggerUserId: string): void {
@@ -66,7 +71,10 @@ class EventHubImpl {
       userId: triggerUserId,
       version: 0,
       timestamp: Date.now(),
-      event: { type: EVENT_TYPES.PRESENCE_CHANGED, data: { viewers: this.getPresence(listId) } },
+      event: {
+        type: EVENT_TYPES.PRESENCE_CHANGED,
+        data: { viewers: this.getPresence(listId) },
+      },
     };
     this.publish(listId, envelope);
   }
@@ -74,25 +82,29 @@ class EventHubImpl {
   private resetPresenceTimer(listId: string, userId: string): void {
     const key = `${listId}:${userId}`;
     this.clearPresenceTimer(listId, userId);
-    this.presenceTimers.set(key, setTimeout(() => {
-      this.presence.get(listId)?.delete(userId);
-      this.presenceTimers.delete(key);
-      this.publishPresenceChanged(listId, userId);
-    }, REALTIME_CONFIG.presenceTimeoutMs));
+    this.presenceTimers.set(
+      key,
+      setTimeout(() => {
+        this.presence.get(listId)?.delete(userId);
+        this.presenceTimers.delete(key);
+        this.publishPresenceChanged(listId, userId);
+      }, REALTIME_CONFIG.presenceTimeoutMs),
+    );
   }
 
   private clearPresenceTimer(listId: string, userId: string): void {
     const key = `${listId}:${userId}`;
     const timer = this.presenceTimers.get(key);
-    if (timer) { clearTimeout(timer); this.presenceTimers.delete(key); }
+    if (timer) {
+      clearTimeout(timer);
+      this.presenceTimers.delete(key);
+    }
   }
 
   reset(): void {
     this.emitter.removeAllListeners();
     this.subscribers.clear();
     this.presence.clear();
-    for (const timer of this.presenceTimers.values()) clearTimeout(timer);
-    this.presenceTimers.clear();
   }
 }
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { auth, getUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireEdit } from "@/lib/authorization";
 import { eventHub } from "@/lib/event-hub";
@@ -34,13 +34,10 @@ function toTaskPayload(task: {
     dueDate: task.dueDate?.toISOString() ?? null,
     listId: task.listId,
     version: task.version,
+    labels:
+      task.labels?.map((l) => ({ id: l.id, name: l.name, color: l.color })) ??
+      [],
   };
-}
-
-async function getUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-  return session.user.id;
 }
 
 export async function createTask(listId: string, data: TaskInput) {

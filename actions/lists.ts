@@ -1,18 +1,12 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { auth, getUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { requireOwner } from "@/lib/authorization";
 import { eventHub } from "@/lib/event-hub";
 import { ConflictError } from "@/lib/errors";
 import { EVENT_TYPES } from "@/lib/realtime-types";
-
-async function getUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-  return session.user.id;
-}
 
 export async function createList(name: string) {
   if (!name || name.trim() === "") {

@@ -12,7 +12,11 @@ import { usePresence } from "@/lib/use-presence";
 import { PresenceIndicator } from "@/components/presence-indicator";
 import { ConnectionStatus } from "@/components/connection-status";
 import { ConflictDialog } from "@/components/conflict-dialog";
-import { EVENT_TYPES, type TaskPayload, type HubEventEnvelope } from "@/lib/realtime-types";
+import {
+  EVENT_TYPES,
+  type TaskPayload,
+  type HubEventEnvelope,
+} from "@/lib/realtime-types";
 
 interface Label {
   id: string;
@@ -47,6 +51,7 @@ function ListContent({
   const {
     optimisticTasks,
     conflictTask,
+    setConflictTask,
     clearConflict,
     applyOptimisticToggle,
     applyOptimisticDelete,
@@ -97,7 +102,7 @@ function ListContent({
         {pending.map((task) => (
           <TaskItem
             key={task.id}
-            task={{ ...task, dueDate: task.dueDate, labels: [] }}
+            task={{ ...task, dueDate: task.dueDate }}
             allLabels={allLabels}
             canEdit={canEdit}
             onOptimisticToggle={applyOptimisticToggle}
@@ -112,12 +117,12 @@ function ListContent({
             {done.map((task) => (
               <TaskItem
                 key={task.id}
-                task={{ ...task, dueDate: task.dueDate, labels: [] }}
+                task={{ ...task, dueDate: task.dueDate }}
                 allLabels={allLabels}
                 canEdit={canEdit}
                 onOptimisticToggle={applyOptimisticToggle}
                 onOptimisticDelete={applyOptimisticDelete}
-                onConflict={(t) => router.refresh()}
+                onConflict={(t) => setConflictTask(t)}
               />
             ))}
           </>
@@ -127,11 +132,7 @@ function ListContent({
         )}
       </div>
       <ConflictDialog
-        task={
-          conflictTask
-            ? { id: conflictTask.id, title: conflictTask.title }
-            : null
-        }
+        task={conflictTask}
         onRefresh={() => {
           clearConflict();
           router.refresh();
