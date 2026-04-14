@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireOwner } from "@/lib/authorization";
 
 async function getSession() {
   const session = await auth();
@@ -33,14 +34,7 @@ export async function renameList(id: string, name: string) {
     throw new Error("Name is required");
   }
 
-  const session = await getSession();
-  const list = await db.list.findUnique({
-    where: { id },
-  });
-
-  if (!list || list.ownerId !== session.user.id) {
-    throw new Error("Not found");
-  }
+  await requireOwner(id);
 
   const trimmed = name.trim();
   const updatedList = await db.list.update({
@@ -54,14 +48,7 @@ export async function renameList(id: string, name: string) {
 }
 
 export async function deleteList(id: string) {
-  const session = await getSession();
-  const list = await db.list.findUnique({
-    where: { id },
-  });
-
-  if (!list || list.ownerId !== session.user.id) {
-    throw new Error("Not found");
-  }
+  await requireOwner(id);
 
   await db.list.delete({
     where: { id },
