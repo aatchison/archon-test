@@ -1,14 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-
-async function getSession() {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-  return session;
-}
+import { requireEdit } from "@/lib/authorization";
 
 type TaskInput = {
   title: string;
@@ -18,10 +12,8 @@ type TaskInput = {
 };
 
 export async function createTask(listId: string, data: TaskInput) {
-  const session = await getSession();
   if (!data.title.trim()) throw new Error("Title is required");
-  const list = await db.list.findUnique({ where: { id: listId } });
-  if (!list || list.ownerId !== session.user.id) throw new Error("Not found");
+  await requireEdit(listId);
   const task = await db.task.create({
     data: { ...data, title: data.title.trim(), listId },
   });
@@ -30,13 +22,12 @@ export async function createTask(listId: string, data: TaskInput) {
 }
 
 export async function updateTask(id: string, data: Partial<TaskInput>) {
-  const session = await getSession();
   const task = await db.task.findUnique({
     where: { id },
     include: { list: true },
   });
-  if (!task || task.list.ownerId !== session.user.id)
-    throw new Error("Not found");
+  if (!task) throw new Error("Not found");
+  await requireEdit(task.listId);
   if (data.title !== undefined && !data.title.trim())
     throw new Error("Title is required");
   const normalizedData =
@@ -47,25 +38,23 @@ export async function updateTask(id: string, data: Partial<TaskInput>) {
 }
 
 export async function deleteTask(id: string) {
-  const session = await getSession();
   const task = await db.task.findUnique({
     where: { id },
     include: { list: true },
   });
-  if (!task || task.list.ownerId !== session.user.id)
-    throw new Error("Not found");
+  if (!task) throw new Error("Not found");
+  await requireEdit(task.listId);
   await db.task.delete({ where: { id } });
   revalidatePath(`/lists/${task.listId}`);
 }
 
 export async function toggleDone(id: string) {
-  const session = await getSession();
   const task = await db.task.findUnique({
     where: { id },
     include: { list: true },
   });
-  if (!task || task.list.ownerId !== session.user.id)
-    throw new Error("Not found");
+  if (!task) throw new Error("Not found");
+  await requireEdit(task.listId);
   const updated = await db.task.update({
     where: { id },
     data: { done: !task.done },
