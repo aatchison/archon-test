@@ -37,18 +37,35 @@ This project uses a set of Archon workflows (`.archon/workflows/`) that automate
 
 ### Available Workflows
 
-| Workflow | Purpose | When to Use |
-|----------|---------|-------------|
-| `recall-workflows` | Load all workflows, memory, and conventions into context | Start of every new task |
-| `opencode-task` | Run a mechanical coding task via local model (Gemma) | Implementing specs, writing tests, scaffolding |
-| `gemma-code-review` | 10-perspective code review via 10 parallel Gemma runs | Before marking any PR ready |
-| `devcontainer` | Build, start, and manage the dev container | Setting up or rebuilding the devcontainer |
-| `run-tests` | Run the full test suite inside the devcontainer | Before committing or creating PRs |
-| `create-sub-issues` | Create GitHub sub-issues linked to a parent issue | After writing an implementation plan |
-| `pre-implementation-check` | Verify issue exists and branch is correct before starting | Before writing any code |
-| `pre-merge-check` | Final check before merging a PR | Before merging |
-| `update-pr-evidence` | Update PR description with test results and token usage | After tests pass |
-| `watch-pr-review` | Poll for PR review comments and surface them | After marking PR ready |
+#### `recall-workflows`
+**Intent:** Load the full project context at the start of any session. Reads all workflow descriptions, the memory index, and CLAUDE.md conventions — so nothing has to be rediscovered from scratch. Always run this first when starting a new task.
+
+#### `opencode-task`
+**Intent:** Delegate any mechanical coding task to the local Gemma model. This is the default for file creation, writing tests, fixing test failures, updating docs, and generating PR descriptions. Routes to Claude only when the task requires genuine judgment (architecture, multi-file debugging). Supports a `--devcontainer` flag for tasks that need project dependencies (bun, prisma, running tests).
+
+#### `gemma-code-review`
+**Intent:** Run 10 Gemma subagents in parallel, each acting as a different critical reviewer (security, performance, accessibility, testing, naming, type safety, API design, error handling, simplicity, maintainability). Produces a single consolidated report. Must be run before marking any PR ready for review.
+
+#### `devcontainer`
+**Intent:** Manage the devcontainer lifecycle — build, rebuild, stop, check status, or exec a command inside it. Validates prerequisites (Docker, SSH agent, gitconfig) before acting. The devcontainer is where all tests run and where Gemma tasks execute when they need project dependencies.
+
+#### `run-tests`
+**Intent:** Run the full test suite (unit + integration + TypeScript check) inside the devcontainer and report results. Must be run before every commit and before marking a PR ready. Fails fast if the container is not running.
+
+#### `create-sub-issues`
+**Intent:** Parse an implementation plan and create a GitHub sub-issue for each task, linked to the parent feature issue. Run this after writing the plan and before writing any code — the sequence is always: Plan → Sub-issues → Implementation.
+
+#### `pre-implementation-check`
+**Intent:** Verify that all prerequisites are in place before dispatching implementation subagents: the parent issue exists, sub-issues have been created for every plan task, and the feature branch is checked out. Prevents starting implementation on the wrong branch or without issue tracking.
+
+#### `pre-merge-check`
+**Intent:** Final gate before merging a PR. Verifies tests pass, the PR body references the parent feature issue (not just sub-tasks), and the issue hierarchy is correct. Prevents merging without closing the parent issue.
+
+#### `update-pr-evidence`
+**Intent:** Run the test suite and update the PR description with evidence — unit test counts, integration test results, TypeScript check status, and a token usage breakdown from `docs/token-usage.md`. Keeps the PR description factual and reviewable without manual copy-paste.
+
+#### `watch-pr-review`
+**Intent:** Poll a PR every 60 seconds for new review comments. For each unresolved comment: read the feedback, make the code change, reply explaining what was done, and resolve the thread. Start this as soon as a PR moves out of draft.
 
 ### Starting a New Feature
 
