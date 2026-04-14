@@ -1,17 +1,24 @@
 name: opencode-task
 description: |
   Run a mechanical coding task using a local model via opencode.
-  Use for simple, well-specified tasks: file creation, config edits, scaffolding, 1-2 file changes.
-  Frees up Claude API budget for reviews and complex reasoning.
-  Triggers: "opencode task", "use local model", "run with gemma", "cheap subagent".
-  NOT for: architecture decisions, multi-file coordination, debugging, or anything requiring judgment.
+
+  DEFAULT: Use Gemma for ALL tasks with clear specs. This is the default, not the exception.
+  Claude handles only: architecture decisions, multi-file debugging, code quality reviews.
+  Everything else — file creation, tests, test fixes, docs, PR descriptions — goes to Gemma first.
+
+  Triggers: "opencode task", "use local model", "run with gemma", "cheap subagent", any mechanical task.
+  NOT for: architecture decisions, multi-file coordination requiring judgment.
 
   Devcontainer mode (--devcontainer flag):
-  - Use when the task needs project dependencies (bun, prisma, node_modules)
+  - Use when the task needs project dependencies (bun, prisma, node_modules, running tests)
   - Requires: opencode config mounted at /root/.config/opencode (see devcontainer.json mounts)
   - The devcontainer workspace is a bind mount — files on the host's current branch are visible
-  - IMPORTANT: Provide full code inline in prompts, don't reference plan files by path
-    (Gemma has no context of prior conversations or plan documents)
+  - IMPORTANT: Provide full code inline in prompts — Gemma has no session context
+
+  Parallel dispatch: For independent tasks, run simultaneously:
+    .archon/scripts/run-opencode.sh ... "task A" &
+    .archon/scripts/run-opencode.sh ... "task B" &
+    wait
 
 nodes:
   - id: check-opencode
