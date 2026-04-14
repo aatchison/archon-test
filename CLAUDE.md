@@ -50,3 +50,6 @@ Jest + React Testing Library. Tests live alongside source files in `__tests__/` 
 - **Never merge directly to main.** All changes must go through a pull request, even small ones. Main is protected.
 - **Branch protection is enabled on main.** PRs require passing status checks before merging. Do not bypass with `--force` or admin overrides.
 - **Branches are deleted automatically after merge.** Do not reuse merged branches — always create a fresh branch for new work.
+- **Create sub-issues BEFORE starting implementation.** Sequence: Plan → Sub-issues → Implementation. Never start Task 1 without sub-issues.
+- **Analyze parallel execution in plans.** Add an "Execution Order" section showing task dependency graph and parallel waves. Launch independent tasks as concurrent Gemma runs.
+- **Use Gemma for mechanical tasks.** Default to `run-opencode.sh` for implementation and spec reviews. Claude only for coordination, code quality reviews, and architecture. Gemma can run inside the devcontainer with `--devcontainer` flag.

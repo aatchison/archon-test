@@ -19,6 +19,7 @@ const base = {
   dueDate: null,
   listId: "l1",
   labels: [],
+  version: 0,
 };
 
 describe("TaskItem", () => {

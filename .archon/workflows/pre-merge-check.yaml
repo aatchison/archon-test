@@ -1,0 +1,96 @@
+name: pre-merge-check
+description: |
+  Verify a PR is ready to merge: tests pass, issue hierarchy is correct, and PR body
+  references the parent feature issue (not just sub-tasks).
+  Run before squash-merging any PR.
+  Triggers: "pre-merge check", "ready to merge", "merge checklist"
+
+nodes:
+  - id: parse-args
+    prompt: |
+      Extract the PR number from the arguments.
+      Arguments: $ARGUMENTS
+
+      Output JSON: { "pr_number": <number> }
+      If no PR number is given, detect from the current branch.
+    model: haiku
+    allowed_tools: []
+    output_format:
+      type: object
+      properties:
+        pr_number:
+          type: integer
+      required: [pr_number]
+
+  - id: check-pr-body
+    bash: |
+      PR=${{ $parse-args.output.pr_number }}
+      echo "=== PR Body ==="
+      gh pr view "$PR" --json body --jq .body
+      echo ""
+      echo "=== Closes References ==="
+      gh pr view "$PR" --json body --jq .body | grep -ioE 'closes? #[0-9]+|fixes? #[0-9]+|resolves? #[0-9]+' || echo "NO_CLOSES_REFS"
+      echo ""
+      echo "=== Linked Issues ==="
+      gh pr view "$PR" --json closingIssuesReferences --jq '.closingIssuesReferences[] | "#\(.number) - \(.title)"' 2>/dev/null || echo "NO_LINKED_ISSUES"
+    depends_on: [parse-args]
+
+  - id: check-issue-hierarchy
+    prompt: |
+      Verify the issue hierarchy for PR #${{ $parse-args.output.pr_number }}.
+
+      PR body and linked issues:
+      ${{ $check-pr-body.output }}
+
+      Check:
+      1. Does the PR body contain a `Closes #N` reference to the PARENT feature issue (not just sub-tasks)?
+      2. Are there any sub-task issues that should also be listed?
+      3. If only sub-task references exist (titles like "Task N: ..."), flag that the parent issue is missing.
+
+      Use `gh issue view <number> --json title,body` to inspect any referenced issues and determine if they are sub-tasks or parent issues.
+
+      Report:
+      - PASS if the parent feature issue is referenced
+      - WARN if only sub-tasks are referenced (list the missing parent)
+      - INFO if no issues are referenced at all
+    depends_on: [check-pr-body]
+    allowed_tools:
+      - bash
+
+  - id: check-status
+    bash: |
+      PR=${{ $parse-args.output.pr_number }}
+      echo "=== PR Checks ==="
+      gh pr checks "$PR" 2>&1 || echo "NO_CHECKS"
+      echo ""
+      echo "=== Unresolved Threads ==="
+      gh api graphql -f query="
+        { repository(owner:\"{owner}\", name:\"{repo}\") {
+          pullRequest(number:$PR) {
+            reviewThreads(first:100) {
+              nodes { isResolved comments(first:1) { nodes { body } } }
+            }
+          }
+        }
+      " --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length' 2>/dev/null || echo "UNKNOWN"
+    depends_on: [parse-args]
+
+  - id: summarize
+    prompt: |
+      Summarize the pre-merge readiness for PR #${{ $parse-args.output.pr_number }}.
+
+      Issue hierarchy check:
+      ${{ $check-issue-hierarchy.output }}
+
+      CI/review status:
+      ${{ $check-status.output }}
+
+      Format as a checklist:
+      - [ ] or [x] Parent feature issue referenced in PR body
+      - [ ] or [x] CI checks passing
+      - [ ] or [x] No unresolved review threads
+      - Any warnings or blockers
+
+      Be concise.
+    depends_on: [check-issue-hierarchy, check-status]
+    allowed_tools: []

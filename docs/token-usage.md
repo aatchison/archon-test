@@ -101,11 +101,96 @@ Tracks Claude vs Gemma (opencode) token usage during todo app foundation impleme
 | Gemma (vllm-31b) | ~120k+ | 22+ review runs |
 | Claude (sonnet) | ~49k | 17 actions |
 
+## Workflow Improvements (between SP3 and SP4)
+
+| Task | Model | Approx Tokens | Time | Notes |
+|------|-------|---------------|------|-------|
+| Workflow/script audit + improvements | Claude (opus) | ~15k | ~5min | Fix gemma-code-review YAML, add resolve-pr-threads.sh, recall-workflows, pre-merge-check |
+| Gemma review of workflow changes | Gemma (vllm-31b) | ~50k | ~3min | 10 perspectives, found glob collision, quoting, hardcoded paths |
+| Fix Gemma findings on workflows | Claude (opus) | ~5k | ~2min | mktemp, quoting, pwd-based paths |
+| Memory consolidation | Claude (opus) | ~3k | ~2min | 9 files → 3 consolidated |
+| Close SP3 sub-issues | Claude (opus) | ~2k | ~1min | 13 sub-issues left open after merge |
+
+### Workflow Improvements Running Totals
+
+| Model | Estimated Tokens | Tasks |
+|-------|-----------------|-------|
+| Gemma (vllm-31b) | ~50k | 10 review runs |
+| Claude (opus) | ~25k | 5 actions |
+
+## Sub-project 4: Real-time (Design Phase)
+
+| Task | Model | Approx Tokens | Time | Notes |
+|------|-------|---------------|------|-------|
+| Codebase exploration for SP4 | Claude (opus) | ~8k | ~3min | Current patterns, missing real-time infra |
+| Research: real-time approaches | Gemma (vllm-31b) | ~5k | ~2min | SSE vs WebSocket vs polling comparison |
+| Research: useOptimistic patterns | Gemma (vllm-31b) | ~5k | ~2min | React 19 hook usage, rollback, gotchas |
+| Approach comparison draft | Gemma (vllm-31b) | ~5k | ~2min | A/B/C trade-off table |
+| Client architecture review | Gemma (vllm-31b) | ~5k | ~2min | Found leader election, router.refresh, echo issues |
+| Testing strategy review | Gemma (vllm-31b) | ~3k | ~1min | Found missing race condition and auth tests |
+| Spec writing | Claude (opus) | ~10k | ~5min | Full design spec with all sections |
+| 10-perspective Gemma spec review | Gemma (vllm-31b) | ~50k | ~3min | Security, simplicity, performance, a11y, etc. |
+| Spec updates from Gemma review | Claude (opus) | ~5k | ~3min | 8 findings incorporated |
+| Implementation plan writing | Claude (opus) | ~15k | ~8min | 15 tasks, 2300+ lines, full TDD code |
+| EventHub test code draft | Gemma (vllm-31b) | ~3k | ~1min | 93 lines of test code |
+| Plan self-review | Claude (opus) | ~5k | ~3min | Spec coverage, placeholder scan, type consistency |
+| 6-perspective Gemma plan review | Gemma (vllm-31b) | ~30k | ~3min | Correctness, testing, architecture, security, DX, performance |
+| Plan fixes from Gemma review | Claude (opus) | ~8k | ~5min | 6 issues fixed: stale presence, rate limit, BC misuse, auto-hide, maxListeners |
+
+### Sub-project 4 Implementation
+
+| Task | Model | Approx Tokens | Time | Notes |
+|------|-------|---------------|------|-------|
+| Tasks 1-3 (Wave 1) | Gemma (vllm-31b) | ~15k | ~5min | Types, config, migration, EventHub — sequential |
+| Tasks 4-7 (Wave 2) | Gemma (vllm-31b) | ~20k | ~5min | Server actions, SSE route, transport — parallel pairs |
+| Task 4 test-preload fix | Claude (opus) | ~3k | ~1min | Added event-hub + ConflictError mocks |
+| Task 5 renameList test fix | Claude (opus) | ~2k | ~1min | findUnique mock for updated list |
+| Tasks 8-10 (Wave 3) | Gemma (vllm-31b) | ~15k | ~5min | useEventSource, usePresence, useTaskList, UI components |
+| Task 9 .tsx rename | Gemma (vllm-31b) | ~2k | ~1min | git mv use-task-list.ts → .tsx |
+| Task 11: TaskItem optimistic UI | Gemma (vllm-31b) | ~5k | ~2min | Clean execution, 5/5 tests pass |
+| Task 11 spec review | Gemma (vllm-31b) | ~3k | ~1min | PASS |
+| Task 11 code review | Gemma (vllm-31b) | ~3k | ~1min | Found 4 issues: a11y, memo, type safety |
+| Task 11 a11y fix | Claude (opus) | ~1k | ~30s | Added aria-label to Delete button |
+| Task 12: Wire Up List Page | Claude (opus) | ~5k | ~2min | Gemma timed out (prompt too long), done directly |
+| Task 12 spec review | Gemma (vllm-31b) | ~3k | ~1min | PASS |
+| Task 12 code review | Gemma (vllm-31b) | ~3k | ~1min | Found 4 issues: perf, a11y, type safety |
+
+| Task 12 review fixes | Claude (opus) | ~2k | ~1min | useMemo, Link, token usage update |
+| Task 13: Test Infrastructure | Gemma (vllm-31b) | ~5k | ~2min | realtime-config mock, test script update |
+| Task 14: Integration Tests | Gemma (vllm-31b) | ~5k | ~2min | Version conflict test (overwrote existing — fixed) |
+| Task 14 fix: restore tests | Claude (opus) | ~3k | ~1min | Restored CRUD tests, appended conflict test |
+| Task 15: Build Verification | Claude (opus) | ~5k | ~3min | Test fix (INTEGRATION_TEST=1 for event-hub), tsc, build |
+
+### Sub-project 4 Running Totals (Design + Implementation)
+
+| Model | Estimated Tokens | Tasks |
+|-------|-----------------|-------|
+| Gemma (vllm-31b) | ~185k | 37 runs |
+| Claude (opus) | ~72k | 17 actions |
+
+## Sub-project 4: Real-time
+
+| Task | Model | Approx Tokens | Notes |
+|------|-------|---------------|-------|
+| Tasks 1-10 (prior session) | Gemma + Claude | ~200k | EventHub, SSE, hooks, components |
+| Tasks 11-15 | Gemma + Claude | ~27k | TaskItem, ListClient, tests, build |
+| Gemma review R1-R4 (40 perspectives) | Gemma (vllm-31b) | ~115k | 4 rounds to convergence |
+| Review fixes | Gemma + Claude | ~20k | Labels, conflict dialog, presence, getUserId |
+| CodeRabbit review responses | Claude (opus) | ~3k | 28 comments replied and resolved |
+
+### Sub-project 4 Running Totals
+
+| Model | Estimated Tokens | Tasks |
+|-------|-----------------|-------|
+| Gemma (vllm-31b) | ~335k | 50+ runs |
+| Claude (opus) | ~30k | 8 actions |
+
 ## Grand Totals (All Sub-projects)
 
 | Model | Estimated Tokens | Task Count | Notes |
 |-------|-----------------|------------|-------|
-| Gemma (vllm-31b) | ~213k+ | 42+ runs | Reviews, mechanical implementation |
-| Claude (sonnet) | ~99k | 33 actions | Coordination, reviews, fixes, test design |
+| Gemma (vllm-31b) | ~548k+ | 92+ runs | Reviews, mechanical implementation |
+| Claude (opus) | ~30k | 8 actions | Coordination, PR management |
+| Claude (sonnet) | ~99k | 33 actions | Reviews, fixes, test design |
 | Claude (haiku) | ~2k | 1 review | Spec compliance check |
-| **Total** | **~314k+** | **76+ actions** | **68% Gemma, 31% Claude sonnet, 1% haiku** |
+| **Total** | **~679k+** | **134+ actions** | **81% Gemma, 15% Claude sonnet, 4% Claude opus** |

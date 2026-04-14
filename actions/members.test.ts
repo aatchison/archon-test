@@ -72,7 +72,7 @@ describe("addMember", () => {
       email: "test@example.com",
     });
     mockMemberFindUnique.mockResolvedValue(null);
-    mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
+    mockListFindUnique.mockResolvedValue({ ownerId: "user-1", version: 0 });
     mockMemberCreate.mockResolvedValue({});
     await addMember("l1", "test@example.com", "EDITOR");
     expect(mockMemberCreate).toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe("removeMember", () => {
   });
 
   it("deletes the member", async () => {
-    mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
+    mockListFindUnique.mockResolvedValue({ ownerId: "user-1", version: 0 });
     mockMemberDelete.mockResolvedValue({});
     await removeMember("l1", "u2");
     expect(mockMemberDelete).toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe("updateMemberRole", () => {
   });
 
   it("updates the role", async () => {
-    mockListFindUnique.mockResolvedValue({ ownerId: "user-1" });
+    mockListFindUnique.mockResolvedValue({ ownerId: "user-1", version: 0 });
     mockMemberUpdate.mockResolvedValue({});
     await updateMemberRole("l1", "u2", "VIEWER");
     expect(mockMemberUpdate).toHaveBeenCalled();

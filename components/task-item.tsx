@@ -5,6 +5,7 @@ import { toggleDone, deleteTask } from "@/actions/tasks";
 import { TaskEditForm } from "@/components/task-edit-form";
 import { LabelBadge } from "@/components/label-badge";
 import { formatDueDate } from "@/lib/dates";
+import { ConflictError } from "@/lib/errors";
 
 interface Label {
   id: string;
@@ -20,6 +21,7 @@ interface Task {
   priority: string;
   dueDate: Date | string | null;
   listId: string;
+  version: number;
   labels: Label[];
 }
 
@@ -27,14 +29,21 @@ interface TaskItemProps {
   task: Task;
   allLabels: Label[];
   canEdit?: boolean;
+  onConflict?: (task: { id: string; title: string }) => void;
+  onOptimisticToggle?: (taskId: string) => void;
+  onOptimisticDelete?: (taskId: string) => void;
 }
 
 export default function TaskItem({
   task,
   allLabels,
   canEdit = true,
+  onConflict,
+  onOptimisticToggle,
+  onOptimisticDelete,
 }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const priorityColors: Record<string, string> = {
     HIGH: "bg-red-500 text-white",
@@ -45,8 +54,39 @@ export default function TaskItem({
 
   const dueDateDisplay = formatDueDate(task.dueDate);
 
+  async function handleToggle() {
+    try {
+      setError(null);
+      onOptimisticToggle?.(task.id);
+      await toggleDone(task.id, { expectedVersion: task.version });
+    } catch (err) {
+      if (err instanceof ConflictError) {
+        onConflict?.({ id: task.id, title: task.title });
+      } else {
+        setError("Failed to update task");
+        console.error("Failed to toggle task:", err);
+      }
+    }
+  }
+
+  async function handleDelete() {
+    try {
+      setError(null);
+      onOptimisticDelete?.(task.id);
+      await deleteTask(task.id);
+    } catch (err) {
+      setError("Failed to delete task");
+      console.error("Failed to delete task:", err);
+    }
+  }
+
   return (
     <div className="flex flex-col border-b">
+      {error && (
+        <p className="text-red-600 text-xs px-2 pt-1" role="alert">
+          {error}
+        </p>
+      )}
       <div className="flex items-center justify-between p-2">
         <div className="flex items-center gap-3">
           <input
@@ -54,13 +94,7 @@ export default function TaskItem({
             checked={task.done}
             disabled={!canEdit}
             aria-label="Toggle task completion"
-            onChange={async () => {
-              try {
-                await toggleDone(task.id);
-              } catch (error) {
-                console.error("Failed to toggle task:", error);
-              }
-            }}
+            onChange={handleToggle}
           />
           {canEdit ? (
             <button
@@ -100,13 +134,8 @@ export default function TaskItem({
         {canEdit && (
           <button
             type="button"
-            onClick={async () => {
-              try {
-                await deleteTask(task.id);
-              } catch (error) {
-                console.error("Failed to delete task:", error);
-              }
-            }}
+            onClick={handleDelete}
+            aria-label={`Delete task ${task.title}`}
             className="text-red-500 hover:text-red-700"
           >
             Delete

@@ -49,7 +49,8 @@ nodes:
       ${{ $find-plan.output }}
 
       For each task:
-      1. Create an issue with `gh issue create --title "<task title>" --body "Sub-task of #<parent>"`
+      1. Create an issue with `gh issue create --title "SP<N> — <task title>" --body "Sub-task of #<parent>"`
+         where <N> is the sub-project number (extract from parent issue title, e.g. "Sub-project 3" → SP3)
       2. Get the issue's database ID with `gh api repos/{owner}/{repo}/issues/<number> --jq '.id'`
       3. Link it as a sub-issue: `gh api repos/{owner}/{repo}/issues/<parent>/sub_issues --method POST --input - <<< '{"sub_issue_id": <db_id>}'`
 

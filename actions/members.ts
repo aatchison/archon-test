@@ -3,6 +3,9 @@
 import { requireOwner } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { eventHub } from "@/lib/event-hub";
+import { auth, getUserId } from "@/lib/auth";
+import { EVENT_TYPES } from "@/lib/realtime-types";
 
 export async function addMember(
   listId: string,
@@ -48,6 +51,23 @@ export async function addMember(
     },
   });
 
+  const currentUserId = await getUserId();
+  eventHub.publish(listId, {
+    id: crypto.randomUUID(),
+    userId: currentUserId,
+    version: 0,
+    timestamp: Date.now(),
+    event: {
+      type: EVENT_TYPES.MEMBER_ADDED,
+      data: {
+        userId: targetUser.id,
+        userName: targetUser.name ?? targetUser.email,
+        role,
+        listId,
+      },
+    },
+  });
+
   revalidatePath(`/lists/${listId}/members`);
 }
 
@@ -69,6 +89,15 @@ export async function removeMember(listId: string, userId: string) {
         userId,
       },
     },
+  });
+
+  const currentUserId = await getUserId();
+  eventHub.publish(listId, {
+    id: crypto.randomUUID(),
+    userId: currentUserId,
+    version: 0,
+    timestamp: Date.now(),
+    event: { type: EVENT_TYPES.MEMBER_REMOVED, data: { userId, listId } },
   });
 
   revalidatePath(`/lists/${listId}/members`);

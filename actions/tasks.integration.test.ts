@@ -61,3 +61,28 @@ describe("task CRUD integration", () => {
     expect(await testDb.task.findUnique({ where: { id: task.id } })).toBeNull();
   });
 });
+
+describe("version conflict integration", () => {
+  it("detects stale version via updateMany", async () => {
+    const task = await testDb.task.create({
+      data: { title: "Conflict Test", listId: "int-list-1" },
+    });
+
+    // Simulate another user updating (version goes to 1)
+    await testDb.task.update({
+      where: { id: task.id },
+      data: { title: "Updated by other user", version: { increment: 1 } },
+    });
+
+    // Try to update with stale version (0) — should match 0 rows
+    const result = await testDb.task.updateMany({
+      where: { id: task.id, version: 0 },
+      data: { done: true, version: { increment: 1 } },
+    });
+
+    expect(result.count).toBe(0);
+
+    // Cleanup
+    await testDb.task.delete({ where: { id: task.id } });
+  });
+});
