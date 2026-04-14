@@ -1,0 +1,90 @@
+name: pre-implementation-check
+description: |
+  Verify all prerequisites are met before starting plan execution.
+  MUST be run after writing the implementation plan and before dispatching any subagents.
+  Checks: parent issue exists, sub-issues created for all tasks, feature branch exists.
+  Triggers: "pre-implementation check", "ready to implement", "before implementation"
+
+nodes:
+  - id: parse-args
+    prompt: |
+      Extract the parent issue number and plan file path from the arguments.
+      Arguments: $ARGUMENTS
+
+      Output JSON: { "parent_issue": <number>, "plan_file": "<path>" }
+      If no plan file given, use the most recent in docs/superpowers/plans/.
+    model: haiku
+    allowed_tools: []
+    output_format:
+      type: object
+      properties:
+        parent_issue:
+          type: integer
+        plan_file:
+          type: string
+      required: [parent_issue, plan_file]
+
+  - id: check-parent-issue
+    bash: |
+      PARENT=${{ $parse-args.output.parent_issue }}
+      STATE=$(gh issue view "$PARENT" --json state,title --jq '.state + " | " + .title' 2>/dev/null)
+      if [ -z "$STATE" ]; then
+        echo "status=FAIL"
+        echo "reason=Parent issue #$PARENT not found"
+      else
+        echo "status=OK"
+        echo "issue=$STATE"
+      fi
+    depends_on: [parse-args]
+
+  - id: check-sub-issues
+    bash: |
+      PARENT=${{ $parse-args.output.parent_issue }}
+      PLAN_FILE="${{ $parse-args.output.plan_file }}"
+      if [ -z "$PLAN_FILE" ]; then
+        PLAN_FILE=$(ls -t docs/superpowers/plans/*.md 2>/dev/null | head -1)
+      fi
+
+      # Count tasks in plan
+      PLAN_TASKS=$(grep -cE '^### Task [0-9]+:' "$PLAN_FILE" 2>/dev/null || echo 0)
+      echo "plan_tasks=$PLAN_TASKS"
+
+      # Count sub-issues linked to parent
+      SUB_ISSUES=$(gh api "repos/{owner}/{repo}/issues/$PARENT/sub_issues" --jq 'length' 2>/dev/null || echo 0)
+      if [ "$SUB_ISSUES" = "" ]; then SUB_ISSUES=0; fi
+      echo "sub_issues=$SUB_ISSUES"
+
+      if [ "$SUB_ISSUES" -lt "$PLAN_TASKS" ]; then
+        echo "status=FAIL"
+        echo "reason=Only $SUB_ISSUES sub-issues exist but plan has $PLAN_TASKS tasks. Run create-sub-issues workflow first."
+      else
+        echo "status=OK"
+      fi
+    depends_on: [parse-args]
+
+  - id: check-branch
+    bash: |
+      BRANCH=$(git branch --show-current)
+      if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+        echo "status=FAIL"
+        echo "reason=Currently on $BRANCH. Create a feature branch first."
+      else
+        echo "status=OK"
+        echo "branch=$BRANCH"
+      fi
+
+  - id: summarize
+    prompt: |
+      Summarize the pre-implementation check results.
+
+      Parent issue: ${{ $check-parent-issue.output }}
+      Sub-issues: ${{ $check-sub-issues.output }}
+      Branch: ${{ $check-branch.output }}
+
+      If any check failed, list what needs to be done before implementation can start.
+      If all passed, say "Ready to implement."
+
+      IMPORTANT: Update docs/token-usage.md with a row for this check if part of a tracked task.
+    depends_on: [check-parent-issue, check-sub-issues, check-branch]
+    trigger_rule: all_done
+    allowed_tools: []
