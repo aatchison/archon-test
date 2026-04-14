@@ -1,4 +1,8 @@
 // @ts-nocheck
+// NOTE: Bun's mock.module() is process-wide and cannot be undone. When this file runs alongside
+// tests that mock @/lib/search (e.g. actions/search.test.ts), the real implementation is replaced.
+// In combined runs, searchTasks and rebuildSearchIndex tests may fail because they rely on the
+// real module. They pass when run individually (bun test lib/search.test.ts).
 import { describe, it, expect, beforeEach, mock } from "bun:test";
 
 // Use dynamic import to get the real module even when other test files mock @/lib/search
