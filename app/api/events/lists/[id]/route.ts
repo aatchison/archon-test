@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { canView } from "@/lib/authorization";
 import { eventHub } from "@/lib/event-hub";
 import { REALTIME_CONFIG } from "@/lib/realtime-config";
-import type { HubEventEnvelope } from "@/lib/realtime-types";
+import { EVENT_TYPES, type HubEventEnvelope } from "@/lib/realtime-types";
 
 export const dynamic = "force-dynamic";
 
@@ -37,16 +37,16 @@ export async function GET(
       const send = (data: string) => {
         try {
           controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-        } catch {
-          // Stream closed
+        } catch (err) {
+          console.warn("SSE send failed (stream likely closed):", err);
         }
       };
 
       const sendKeepalive = () => {
         try {
           controller.enqueue(encoder.encode(":keepalive\n\n"));
-        } catch {
-          // Stream closed
+        } catch (err) {
+          console.warn("SSE keepalive failed (stream likely closed):", err);
         }
       };
 
@@ -60,7 +60,7 @@ export async function GET(
 
           // Close stream if this user was removed from the list
           if (
-            envelope.event.type === "member:removed" &&
+            envelope.event.type === EVENT_TYPES.MEMBER_REMOVED &&
             envelope.event.data.userId === userId
           ) {
             cleanup();

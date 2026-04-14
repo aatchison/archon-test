@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireOwner } from "@/lib/authorization";
 import { eventHub } from "@/lib/event-hub";
 import { ConflictError } from "@/lib/errors";
+import { EVENT_TYPES } from "@/lib/realtime-types";
 
 async function getUserId(): Promise<string> {
   const session = await auth();
@@ -68,7 +69,7 @@ export async function renameList(
       version: updated.version,
       timestamp: Date.now(),
       event: {
-        type: "list:updated",
+        type: EVENT_TYPES.LIST_UPDATED,
         data: { id: updated.id, name: updated.name, version: updated.version },
       },
     });

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useOptimistic, useCallback, useTransition } from "react";
-import type { HubEventEnvelope, TaskPayload } from "./realtime-types";
+import { EVENT_TYPES, type HubEventEnvelope, type TaskPayload } from "./realtime-types";
 
 interface TaskListContextValue {
   tasks: TaskPayload[];
@@ -69,12 +69,12 @@ export function TaskListProvider({
       const { event } = envelope;
       setTasks((prev) => {
         switch (event.type) {
-          case "task:created":
+          case EVENT_TYPES.TASK_CREATED:
             if (prev.some((t) => t.id === event.data.id)) return prev;
             return [...prev, event.data];
-          case "task:updated":
+          case EVENT_TYPES.TASK_UPDATED:
             return prev.map((t) => t.id === event.data.id && event.data.version > t.version ? event.data : t);
-          case "task:deleted":
+          case EVENT_TYPES.TASK_DELETED:
             return prev.filter((t) => t.id !== event.data.id);
           default:
             return prev;

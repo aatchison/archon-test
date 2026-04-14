@@ -103,8 +103,8 @@ export class SseTransport {
       const json = line.slice(6);
       const envelope = JSON.parse(json) as HubEventEnvelope;
       this.options.onEvent(envelope);
-    } catch {
-      // Ignore parse errors
+    } catch (err) {
+      console.warn("SSE parse error for line:", line, err);
     }
   }
 

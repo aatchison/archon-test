@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { requireEdit } from "@/lib/authorization";
 import { eventHub } from "@/lib/event-hub";
 import { ConflictError } from "@/lib/errors";
-import type { TaskPayload } from "@/lib/realtime-types";
+import { EVENT_TYPES, type TaskPayload } from "@/lib/realtime-types";
 
 type TaskInput = {
   title: string;
@@ -56,7 +56,7 @@ export async function createTask(listId: string, data: TaskInput) {
     userId,
     version: task.version,
     timestamp: Date.now(),
-    event: { type: "task:created", data: toTaskPayload(task) },
+    event: { type: EVENT_TYPES.TASK_CREATED, data: toTaskPayload(task) },
   });
   return task;
 }
@@ -105,7 +105,7 @@ export async function updateTask(
     userId,
     version: updated.version,
     timestamp: Date.now(),
-    event: { type: "task:updated", data: toTaskPayload(updated) },
+    event: { type: EVENT_TYPES.TASK_UPDATED, data: toTaskPayload(updated) },
   });
   return updated;
 }
@@ -122,7 +122,7 @@ export async function deleteTask(id: string) {
     userId,
     version: task.version,
     timestamp: Date.now(),
-    event: { type: "task:deleted", data: toTaskPayload(task) },
+    event: { type: EVENT_TYPES.TASK_DELETED, data: toTaskPayload(task) },
   });
 }
 
@@ -163,7 +163,7 @@ export async function toggleDone(
     userId,
     version: updated.version,
     timestamp: Date.now(),
-    event: { type: "task:updated", data: toTaskPayload(updated) },
+    event: { type: EVENT_TYPES.TASK_UPDATED, data: toTaskPayload(updated) },
   });
   return updated;
 }

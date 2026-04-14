@@ -5,6 +5,13 @@ import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { eventHub } from "@/lib/event-hub";
 import { auth } from "@/lib/auth";
+import { EVENT_TYPES } from "@/lib/realtime-types";
+
+async function getUserId(): Promise<string> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  return session.user.id;
+}
 
 export async function addMember(
   listId: string,
@@ -50,14 +57,14 @@ export async function addMember(
     },
   });
 
-  const session = await auth();
+  const currentUserId = await getUserId();
   eventHub.publish(listId, {
     id: crypto.randomUUID(),
-    userId: session?.user?.id ?? "",
+    userId: currentUserId,
     version: 0,
     timestamp: Date.now(),
     event: {
-      type: "member:added",
+      type: EVENT_TYPES.MEMBER_ADDED,
       data: {
         userId: targetUser.id,
         userName: targetUser.name ?? targetUser.email,
@@ -90,13 +97,13 @@ export async function removeMember(listId: string, userId: string) {
     },
   });
 
-  const session = await auth();
+  const currentUserId = await getUserId();
   eventHub.publish(listId, {
     id: crypto.randomUUID(),
-    userId: session?.user?.id ?? "",
+    userId: currentUserId,
     version: 0,
     timestamp: Date.now(),
-    event: { type: "member:removed", data: { userId, listId } },
+    event: { type: EVENT_TYPES.MEMBER_REMOVED, data: { userId, listId } },
   });
 
   revalidatePath(`/lists/${listId}/members`);

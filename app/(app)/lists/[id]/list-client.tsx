@@ -12,7 +12,7 @@ import { usePresence } from "@/lib/use-presence";
 import { PresenceIndicator } from "@/components/presence-indicator";
 import { ConnectionStatus } from "@/components/connection-status";
 import { ConflictDialog } from "@/components/conflict-dialog";
-import type { TaskPayload, HubEventEnvelope } from "@/lib/realtime-types";
+import { EVENT_TYPES, type TaskPayload, type HubEventEnvelope } from "@/lib/realtime-types";
 
 interface Label {
   id: string;
@@ -57,10 +57,10 @@ function ListContent({
   const eventHandlers = useMemo(
     () =>
       ({
-        "task:created": handleTaskEvent,
-        "task:updated": handleTaskEvent,
-        "task:deleted": handleTaskEvent,
-        "presence:changed": handlePresenceChanged,
+        [EVENT_TYPES.TASK_CREATED]: handleTaskEvent,
+        [EVENT_TYPES.TASK_UPDATED]: handleTaskEvent,
+        [EVENT_TYPES.TASK_DELETED]: handleTaskEvent,
+        [EVENT_TYPES.PRESENCE_CHANGED]: handlePresenceChanged,
       }) as Record<string, (envelope: HubEventEnvelope) => void>,
     [handleTaskEvent, handlePresenceChanged],
   );

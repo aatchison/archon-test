@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import type { HubEventEnvelope } from "./realtime-types";
+import { EVENT_TYPES, type HubEventEnvelope } from "./realtime-types";
 import { REALTIME_CONFIG } from "./realtime-config";
 
 interface Subscriber {
@@ -66,7 +66,7 @@ class EventHubImpl {
       userId: triggerUserId,
       version: 0,
       timestamp: Date.now(),
-      event: { type: "presence:changed", data: { viewers: this.getPresence(listId) } },
+      event: { type: EVENT_TYPES.PRESENCE_CHANGED, data: { viewers: this.getPresence(listId) } },
     };
     this.publish(listId, envelope);
   }

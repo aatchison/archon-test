@@ -1,11 +1,21 @@
+export const EVENT_TYPES = {
+  TASK_CREATED: "task:created",
+  TASK_UPDATED: "task:updated",
+  TASK_DELETED: "task:deleted",
+  LIST_UPDATED: "list:updated",
+  MEMBER_ADDED: "member:added",
+  MEMBER_REMOVED: "member:removed",
+  PRESENCE_CHANGED: "presence:changed",
+} as const;
+
 export type HubEvent =
-  | { type: "task:created"; data: TaskPayload }
-  | { type: "task:updated"; data: TaskPayload }
-  | { type: "task:deleted"; data: TaskPayload }
-  | { type: "list:updated"; data: ListPayload }
-  | { type: "member:added"; data: MemberAddedPayload }
-  | { type: "member:removed"; data: MemberRemovedPayload }
-  | { type: "presence:changed"; data: PresencePayload };
+  | { type: typeof EVENT_TYPES.TASK_CREATED; data: TaskPayload }
+  | { type: typeof EVENT_TYPES.TASK_UPDATED; data: TaskPayload }
+  | { type: typeof EVENT_TYPES.TASK_DELETED; data: TaskPayload }
+  | { type: typeof EVENT_TYPES.LIST_UPDATED; data: ListPayload }
+  | { type: typeof EVENT_TYPES.MEMBER_ADDED; data: MemberAddedPayload }
+  | { type: typeof EVENT_TYPES.MEMBER_REMOVED; data: MemberRemovedPayload }
+  | { type: typeof EVENT_TYPES.PRESENCE_CHANGED; data: PresencePayload };
 
 export interface TaskPayload {
   id: string;
