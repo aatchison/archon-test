@@ -59,6 +59,7 @@ model List {
   description String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  version     Int          @default(0)
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   members     ListMember[]
@@ -83,6 +84,7 @@ model Task {
   dueDate     DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  version     Int         @default(0)
   listId      String
   list        List        @relation(fields: [listId], references: [id], onDelete: Cascade)
   assigneeId  String?
