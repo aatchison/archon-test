@@ -5,6 +5,28 @@ mock.module("@/lib/auth", () => ({
   auth: async () => ({ user: { id: "user-1" } }),
 }));
 
+mock.module("@/lib/event-hub", () => ({
+  eventHub: {
+    subscribe: () => () => {},
+    publish: () => {},
+    getPresence: () => [],
+    getConnectionCount: () => 0,
+    reset: () => {},
+  },
+  resetEventHub: () => {},
+}));
+
+mock.module("@/lib/errors", () => ({
+  ConflictError: class ConflictError extends Error {
+    currentVersion: number;
+    constructor(msg: string, v: number) {
+      super(msg);
+      this.name = "ConflictError";
+      this.currentVersion = v;
+    }
+  },
+}));
+
 const mockRequireEdit = spyOn({ fn: async () => "user-1" }, "fn");
 
 mock.module("@/lib/authorization", () => ({
@@ -15,6 +37,7 @@ const mockTaskCreate = spyOn({ fn: async () => ({}) }, "fn");
 const mockTaskFindUnique = spyOn({ fn: async () => ({}) }, "fn");
 const mockTaskUpdate = spyOn({ fn: async () => ({}) }, "fn");
 const mockTaskDelete = spyOn({ fn: async () => ({}) }, "fn");
+const mockTaskUpdateMany = spyOn({ fn: async () => ({}) }, "fn");
 
 mock.module("@/lib/db", () => ({
   db: {
@@ -23,6 +46,7 @@ mock.module("@/lib/db", () => ({
       findUnique: (...args: unknown[]) => mockTaskFindUnique(...args),
       update: (...args: unknown[]) => mockTaskUpdate(...args),
       delete: (...args: unknown[]) => mockTaskDelete(...args),
+      updateMany: (...args: unknown[]) => mockTaskUpdateMany(...args),
     },
   },
 }));
@@ -40,6 +64,10 @@ const mockTask = {
   title: "Test",
   done: false,
   listId: "l1",
+  version: 0,
+  description: null,
+  priority: "NONE",
+  dueDate: null,
   list: { id: "l1", ownerId: "user-1" },
 };
 
@@ -50,6 +78,7 @@ describe("createTask", () => {
     mockTaskFindUnique.mockReset();
     mockTaskUpdate.mockReset();
     mockTaskDelete.mockReset();
+    mockTaskUpdateMany.mockReset();
   });
 
   it("throws if title is empty", async () => {
@@ -77,21 +106,26 @@ describe("toggleDone", () => {
     mockRequireEdit.mockReset().mockResolvedValue("user-1");
     mockTaskFindUnique.mockReset();
     mockTaskUpdate.mockReset();
+    mockTaskUpdateMany.mockReset();
   });
 
   it("flips done false to true", async () => {
-    mockTaskFindUnique.mockResolvedValue({ ...mockTask, done: false });
+    mockTaskFindUnique
+      .mockResolvedValueOnce({ ...mockTask, done: false })
+      .mockResolvedValueOnce({ ...mockTask, done: true });
     mockTaskUpdate.mockResolvedValue({ ...mockTask, done: true });
     const result = await toggleDone("t1");
     expect(mockTaskUpdate).toHaveBeenCalledWith({
       where: { id: "t1" },
-      data: { done: true },
+      data: { done: true, version: { increment: 1 } },
     });
     expect(result.done).toBe(true);
   });
 
   it("flips done true to false", async () => {
-    mockTaskFindUnique.mockResolvedValue({ ...mockTask, done: true });
+    mockTaskFindUnique
+      .mockResolvedValueOnce({ ...mockTask, done: true })
+      .mockResolvedValueOnce({ ...mockTask, done: false });
     mockTaskUpdate.mockResolvedValue({ ...mockTask, done: false });
     expect((await toggleDone("t1")).done).toBe(false);
   });
@@ -102,6 +136,7 @@ describe("deleteTask", () => {
     mockRequireEdit.mockReset().mockResolvedValue("user-1");
     mockTaskFindUnique.mockReset();
     mockTaskDelete.mockReset();
+    mockTaskUpdateMany.mockReset();
   });
 
   it("throws Not found if not authorized", async () => {
