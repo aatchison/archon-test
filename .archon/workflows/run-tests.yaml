@@ -2,7 +2,8 @@ name: run-tests
 description: |
   Run the full test suite inside the devcontainer and report results.
   Runs unit tests, integration tests, and TypeScript check.
-  Triggers: "run tests", "test plan", "verify tests", "check tests"
+  MUST be run before every commit and before marking PRs ready for review.
+  Triggers: "run tests", "test plan", "verify tests", "check tests", "pre-commit check"
 
 nodes:
   - id: check-container

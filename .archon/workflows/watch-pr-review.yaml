@@ -1,7 +1,7 @@
 name: watch-pr-review
 description: |
   Watch a PR for review comments, address them, reply, and resolve conversations.
-  Polls every 2 minutes for new comments. For each unresolved comment:
+  Polls every 60 seconds for new comments. Auto-start when moving a PR out of draft. For each unresolved comment:
   1. Read the comment and understand the feedback
   2. Make the requested code change (if applicable)
   3. Reply to the comment explaining what was done
