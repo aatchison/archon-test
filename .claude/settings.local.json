@@ -19,10 +19,6 @@
       "Bash(git pull:*)",
       "Bash(archon workflow:*)",
       "Bash(python3 -m json.tool)",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(len\\(d['permissions']['allow']\\), 'allow,', len\\(d['permissions']['deny']\\), 'deny'\\)\")",
-      "Bash(echo \"EXIT:$?\")",
-      "Bash(echo \"json_valid_exit: $?\")",
-      "Bash(echo \"deny_count_exit: $?\")",
       "Bash(python3:*)",
       "Bash(git check-ignore:*)",
       "Bash(gh api:*)",
@@ -30,11 +26,14 @@
       "Bash(opencode run:*)",
       "Bash(opencode models:*)",
       "Bash(archon validate:*)",
-<<<<<<< Updated upstream
-      "Bash(.archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 2 'Apply the following 5 fixes in order. Read each file before modifying.:*)"
-=======
-      "Bash(docker exec:*)"
->>>>>>> Stashed changes
+      "Bash(.archon/scripts/run-opencode.sh:*)",
+      "Bash(docker exec:*)",
+      "Bash(git -C /home/aatchison/.archon/workspaces/archon-test config -l)",
+      "Bash(ls -la /home/aatchison/.archon/workspaces/archon-test/components/*.tsx)",
+      "Bash(awk '{print $NF}')",
+      "Bash(grep -h \"^export\" /home/aatchison/.archon/workspaces/archon-test/components/*.tsx)",
+      "Bash(ls -la /home/aatchison/.archon/workspaces/archon-test/lib/*.ts)",
+      "Bash(xargs -I {} basename {})"
     ]
   }
 }

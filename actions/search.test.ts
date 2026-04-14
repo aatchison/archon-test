@@ -15,8 +15,15 @@ const mockGetSuggestions = spyOn({ fn: async () => [] }, "fn");
 mock.module("@/lib/search", () => ({
   searchTasks: (...args: unknown[]) => mockSearchTasks(...args),
   getSearchSuggestions: (...args: unknown[]) => mockGetSuggestions(...args),
-  sanitizeQuery: (raw: string) => raw,
-  rebuildSearchIndex: async () => {},
+  sanitizeQuery: (raw: string) => {
+    const words = raw.trim().split(/\s+/).filter((w) => w.length > 0).map((w) => w.replace(/\"/g, ""));
+    if (words.length === 0) return "";
+    return words.map((w, i) => (i === words.length - 1 ? '"' + w + '"*' : '"' + w + '"')).join(" ");
+  },
+  rebuildSearchIndex: async (prisma: any) => {
+    await prisma.$queryRawUnsafe("DELETE FROM task_fts");
+    await prisma.$queryRawUnsafe("INSERT INTO task_fts(task_id, title, description) SELECT id, title, COALESCE(description, '') FROM \"Task\"");
+  },
 }));
 
 mock.module("@/lib/db", () => ({ db: {} }));

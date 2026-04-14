@@ -24,10 +24,17 @@ mock.module("@/actions/search", () => ({
   getSearchSuggestions: (...args: any[]) => mockGetSuggestions(...args),
 }));
 mock.module("@/lib/search", () => ({
-  sanitizeQuery: (raw: string) => raw,
+  sanitizeQuery: (raw: string) => {
+    const words = raw.trim().split(/\s+/).filter((w) => w.length > 0).map((w) => w.replace(/\"/g, ""));
+    if (words.length === 0) return "";
+    return words.map((w, i) => (i === words.length - 1 ? '"' + w + '"*' : '"' + w + '"')).join(" ");
+  },
   searchTasks: async () => ({ tasks: [], total: 0 }),
   getSearchSuggestions: async () => [],
-  rebuildSearchIndex: async () => {},
+  rebuildSearchIndex: async (prisma: any) => {
+    await prisma.$queryRawUnsafe("DELETE FROM task_fts");
+    await prisma.$queryRawUnsafe("INSERT INTO task_fts(task_id, title, description) SELECT id, title, COALESCE(description, '') FROM \"Task\"");
+  },
 }));
 
 import { SearchBar } from "./search-bar";
