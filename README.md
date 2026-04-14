@@ -16,8 +16,10 @@ A Next.js todo/task manager used as a sandbox for testing [Archon](https://githu
 Development runs inside a devcontainer. To start it:
 
 ```bash
+# Requires: Archon CLI (https://github.com/coleam00/Archon)
 archon workflow run devcontainer build
 ```
+(requires [Archon CLI](https://github.com/coleam00/Archon))
 
 SSH agent, `~/.gitconfig`, and `~/.aws` are mounted from the host automatically. The devcontainer includes bun, git, docker-in-docker, and the AWS CLI.
 
@@ -33,7 +35,7 @@ bunx prisma migrate dev  # Apply migrations
 
 ## Archon Workflow Reference
 
-This project uses a set of Archon workflows (`.archon/workflows/`) that automate common development tasks. Run any workflow with `archon workflow run <name>`.
+This project uses a set of Archon workflows (`.archon/workflows/`) that automate common development tasks. Run any workflow with `archon workflow run <name>`. See the [Archon repository](https://github.com/coleam00/Archon) for CLI installation and full documentation.
 
 ### Available Workflows
 
@@ -139,6 +141,8 @@ This project offloads mechanical tasks to a local Gemma model via [opencode](htt
 # Devcontainer (needs bun, prisma, node_modules, or running tests)
 .archon/scripts/run-opencode.sh --devcontainer vllm-31b/google/gemma-4-31B-it 120 2 \"task description\"
 ```
+
+Powered by [opencode](https://opencode.ai) — an open-source AI coding assistant.
 
 The script includes an activity watchdog: if output stalls for the timeout (seconds), it kills and retries up to the retry count.
 
