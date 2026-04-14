@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
+import { SearchBar } from "@/components/search-bar";
 
 export default function Sidebar({
   lists,
@@ -13,6 +14,9 @@ export default function Sidebar({
   return (
     <aside className="w-64 border-r bg-gray-50 flex flex-col h-full">
       <div className="p-4 font-bold text-xl border-b">Archon Todo</div>
+      <div className="p-4 pb-0">
+        <SearchBar />
+      </div>
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         <Link href="/lists" className="block p-2 hover:bg-gray-200 rounded">
           All lists

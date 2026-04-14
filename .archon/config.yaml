@@ -1,0 +1,6 @@
+# Archon project configuration
+worktree:
+  # Copy these gitignored files into worktrees to prevent merge conflicts
+  # when worktree operations stash/unstash changes
+  copyFiles:
+    - .claude/settings.local.json
