@@ -138,6 +138,10 @@ beforeAll(async () => {
       },
     });
   }
+
+  // FTS5 triggers don't fire reliably through the libsql Prisma adapter,
+  // so we rebuild the search index explicitly after seeding test data.
+  await rebuildSearchIndex(testDb);
 });
 
 afterAll(async () => {
