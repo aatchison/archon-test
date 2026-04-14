@@ -1,6 +1,22 @@
 # archon-test
 
-A Next.js todo/task manager used as a sandbox for testing [Archon](https://github.com/coleam00/Archon) AI development workflows. The app itself is simple — the real value is the documented conventions for AI-assisted development.
+> A sandbox for [Archon](https://github.com/coleam00/Archon) — the open-source harness builder for AI coding workflows.
+
+Archon does for AI coding workflows what Dockerfiles did for infrastructure: it lets you define repeatable, composable development processes in YAML. Each workflow mixes deterministic steps (bash scripts, tests, GitHub CLI) with AI-powered nodes, running in isolated git worktrees so parallel execution never conflicts.
+
+This project is a simple Next.js todo app — the app itself is intentionally unremarkable. What matters is the `.archon/workflows/` directory: a set of battle-tested workflows for the full development cycle, from issue creation through implementation, testing, multi-perspective code review, and PR merge.
+
+**What Archon provides here:**
+- Repeatable execution — the same workflow sequence runs identically every time
+- Isolation — git worktrees keep parallel Gemma tasks from interfering with each other
+- Composability — bash, AI prompts, and human approval gates mixed in one YAML file
+- Portability — workflows work from CLI, and can be triggered from Slack, Telegram, or GitHub
+
+See the [Archon repository](https://github.com/coleam00/Archon) for installation and full documentation.
+
+---
+
+
 
 ## Stack
 
