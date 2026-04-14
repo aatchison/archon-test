@@ -33,6 +33,9 @@ export function ColorPicker({
               : "border-transparent"
           }`}
           style={{ backgroundColor: color.hex }}
+          aria-label={
+            selected === color.hex ? `${color.name} (selected)` : color.name
+          }
           title={color.name}
         />
       ))}

@@ -18,17 +18,17 @@ export default async function ListPage({
   if (!session?.user?.id) redirect("/login");
 
   const { id } = await params;
-  const sParams = await searchParams;
+  const searchParamsData = await searchParams;
 
   const allLabels = await db.label.findMany({
     where: { userId: session.user.id },
     orderBy: { name: "asc" },
   });
 
-  const priority = sParams.priority as string | undefined;
-  const label = sParams.label as string | string[] | undefined;
-  const due = sParams.due as string | undefined;
-  const status = sParams.status as string | undefined;
+  const priority = searchParamsData.priority as string | undefined;
+  const label = searchParamsData.label as string | string[] | undefined;
+  const due = searchParamsData.due as string | undefined;
+  const status = searchParamsData.status as string | undefined;
 
   const where = buildTaskWhere(id, { priority, label, due, status });
 

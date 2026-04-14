@@ -37,6 +37,7 @@ export function LabelPicker({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
         className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 border rounded-md flex items-center gap-2"
       >
         <span>Labels</span>

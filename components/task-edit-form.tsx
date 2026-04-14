@@ -65,8 +65,11 @@ export function TaskEditForm({ task, allLabels, onClose }: TaskEditFormProps) {
   return (
     <div className="flex flex-col gap-4 p-4 border rounded-lg bg-white shadow-sm">
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium">Title</label>
+        <label htmlFor="edit-title" className="text-sm font-medium">
+          Title
+        </label>
         <input
+          id="edit-title"
           className="px-2 py-1 border rounded-md"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -75,8 +78,11 @@ export function TaskEditForm({ task, allLabels, onClose }: TaskEditFormProps) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium">Description</label>
+        <label htmlFor="edit-description" className="text-sm font-medium">
+          Description
+        </label>
         <textarea
+          id="edit-description"
           className="px-2 py-1 border rounded-md"
           rows={2}
           value={description}
@@ -87,8 +93,11 @@ export function TaskEditForm({ task, allLabels, onClose }: TaskEditFormProps) {
 
       <div className="flex gap-4 items-end">
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium">Priority</label>
+          <label htmlFor="edit-priority" className="text-sm font-medium">
+            Priority
+          </label>
           <select
+            id="edit-priority"
             className="px-2 py-1 border rounded-md"
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
@@ -101,8 +110,11 @@ export function TaskEditForm({ task, allLabels, onClose }: TaskEditFormProps) {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium">Due Date</label>
+          <label htmlFor="edit-duedate" className="text-sm font-medium">
+            Due Date
+          </label>
           <input
+            id="edit-duedate"
             type="date"
             className="px-2 py-1 border rounded-md"
             value={dueDate}

@@ -1,6 +1,8 @@
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 export function buildTaskWhere(
   listId: string,
-  params: {
+  filterParams: {
     priority?: string;
     label?: string | string[];
     due?: string;
@@ -10,31 +12,31 @@ export function buildTaskWhere(
   // Build a Prisma-compatible where object
   const where: Record<string, unknown> = { listId };
 
-  if (params.priority && params.priority !== "any")
-    where.priority = params.priority;
-  if (params.status === "active") where.done = false;
-  else if (params.status === "completed") where.done = true;
+  if (filterParams.priority && filterParams.priority !== "any")
+    where.priority = filterParams.priority;
+  if (filterParams.status === "active") where.done = false;
+  else if (filterParams.status === "completed") where.done = true;
 
-  if (params.due) {
+  if (filterParams.due) {
     const now = new Date();
     const startOfDay = new Date(
       now.getFullYear(),
       now.getMonth(),
       now.getDate(),
     );
-    const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000 - 1);
-    const endOfWeek = new Date(startOfDay.getTime() + 7 * 24 * 60 * 60 * 1000);
-    if (params.due === "overdue") where.dueDate = { lt: now, not: null };
-    else if (params.due === "today")
+    const endOfDay = new Date(startOfDay.getTime() + MS_PER_DAY - 1);
+    const endOfWeek = new Date(startOfDay.getTime() + 7 * MS_PER_DAY);
+    if (filterParams.due === "overdue") where.dueDate = { lt: now, not: null };
+    else if (filterParams.due === "today")
       where.dueDate = { gte: startOfDay, lte: endOfDay };
-    else if (params.due === "week")
+    else if (filterParams.due === "week")
       where.dueDate = { gte: startOfDay, lte: endOfWeek };
   }
 
-  const labelIds = Array.isArray(params.label)
-    ? params.label
-    : params.label
-      ? [params.label]
+  const labelIds = Array.isArray(filterParams.label)
+    ? filterParams.label
+    : filterParams.label
+      ? [filterParams.label]
       : [];
   if (labelIds.length > 0)
     where.labels = { some: { labelId: { in: labelIds } } };

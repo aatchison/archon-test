@@ -15,6 +15,8 @@ async function getSession() {
 export async function createLabel(data: { name: string; color: string }) {
   const session = await getSession();
   if (!data.name?.trim()) throw new Error("Name is required");
+  if (data.color && !/^#[0-9a-fA-F]{6}$/.test(data.color))
+    throw new Error("Invalid color format");
 
   await db.label.create({
     data: {
@@ -41,6 +43,8 @@ export async function updateLabel(
   if (data.name !== undefined && !data.name?.trim()) {
     throw new Error("Name cannot be empty");
   }
+  if (data.color && !/^#[0-9a-fA-F]{6}$/.test(data.color))
+    throw new Error("Invalid color format");
 
   await db.label.update({
     where: { id },
@@ -79,12 +83,21 @@ export async function addLabelToTask(taskId: string, labelId: string) {
     throw new Error("Unauthorized");
   }
 
-  await db.taskLabel.create({
-    data: {
-      taskId,
-      labelId,
-    },
-  });
+  try {
+    await db.taskLabel.create({
+      data: {
+        taskId,
+        labelId,
+      },
+    });
+  } catch (error: unknown) {
+    const prismaError = error as { code?: string };
+    if (prismaError.code === "P2002") {
+      // Already exists — idempotent, return silently
+      return;
+    }
+    throw error;
+  }
 
   revalidatePath(`/lists/${task.listId}`);
 }

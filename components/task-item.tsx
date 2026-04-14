@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toggleDone, deleteTask } from "@/actions/tasks";
 import { TaskEditForm } from "@/components/task-edit-form";
 import { LabelBadge } from "@/components/label-badge";
+import { formatDueDate } from "@/lib/dates";
 
 interface Label {
   id: string;
@@ -37,28 +38,6 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
     NONE: "hidden",
   };
 
-  const formatDueDate = (dateString: Date | string | null) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const compareDate = new Date(date);
-    compareDate.setHours(0, 0, 0, 0);
-
-    const diffTime = compareDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) return { text: "Overdue", className: "text-red-500" };
-    if (diffDays === 0) return { text: "Today", className: "text-gray-600" };
-    if (diffDays === 1) return { text: "Tomorrow", className: "text-gray-600" };
-
-    return {
-      text: date.toLocaleDateString(),
-      className: "text-gray-400",
-    };
-  };
-
   const dueDateDisplay = formatDueDate(task.dueDate);
 
   return (
@@ -68,8 +47,13 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
           <input
             type="checkbox"
             checked={task.done}
+            aria-label="Toggle task completion"
             onChange={async () => {
-              await toggleDone(task.id);
+              try {
+                await toggleDone(task.id);
+              } catch (error) {
+                console.error("Failed to toggle task:", error);
+              }
             }}
           />
           <button
@@ -104,7 +88,11 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
         <button
           type="button"
           onClick={async () => {
-            await deleteTask(task.id);
+            try {
+              await deleteTask(task.id);
+            } catch (error) {
+              console.error("Failed to delete task:", error);
+            }
           }}
           className="text-red-500 hover:text-red-700"
         >
