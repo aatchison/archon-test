@@ -131,20 +131,25 @@ Tracks Claude vs Gemma (opencode) token usage during todo app foundation impleme
 | Spec writing | Claude (opus) | ~10k | ~5min | Full design spec with all sections |
 | 10-perspective Gemma spec review | Gemma (vllm-31b) | ~50k | ~3min | Security, simplicity, performance, a11y, etc. |
 | Spec updates from Gemma review | Claude (opus) | ~5k | ~3min | 8 findings incorporated |
+| Implementation plan writing | Claude (opus) | ~15k | ~8min | 15 tasks, 2300+ lines, full TDD code |
+| EventHub test code draft | Gemma (vllm-31b) | ~3k | ~1min | 93 lines of test code |
+| Plan self-review | Claude (opus) | ~5k | ~3min | Spec coverage, placeholder scan, type consistency |
+| 6-perspective Gemma plan review | Gemma (vllm-31b) | ~30k | ~3min | Correctness, testing, architecture, security, DX, performance |
+| Plan fixes from Gemma review | Claude (opus) | ~8k | ~5min | 6 issues fixed: stale presence, rate limit, BC misuse, auto-hide, maxListeners |
 
-### Sub-project 4 Design Running Totals
+### Sub-project 4 Design+Planning Running Totals
 
 | Model | Estimated Tokens | Tasks |
 |-------|-----------------|-------|
-| Gemma (vllm-31b) | ~73k | 16 review/research runs |
-| Claude (opus) | ~23k | 4 actions |
+| Gemma (vllm-31b) | ~106k | 19 review/research runs |
+| Claude (opus) | ~51k | 9 actions |
 
 ## Grand Totals (All Sub-projects)
 
 | Model | Estimated Tokens | Task Count | Notes |
 |-------|-----------------|------------|-------|
-| Gemma (vllm-31b) | ~336k+ | 68+ runs | Reviews, research, mechanical implementation |
+| Gemma (vllm-31b) | ~369k+ | 71+ runs | Reviews, research, mechanical implementation |
 | Claude (sonnet) | ~99k | 33 actions | Coordination, reviews, fixes, test design |
-| Claude (opus) | ~48k | 9 actions | Design, workflow improvements, spec writing |
+| Claude (opus) | ~76k | 14 actions | Design, plans, workflow improvements, spec writing |
 | Claude (haiku) | ~2k | 1 review | Spec compliance check |
-| **Total** | **~485k+** | **111+ actions** | **69% Gemma, 20% Claude sonnet, 10% Claude opus, 1% haiku** |
+| **Total** | **~546k+** | **119+ actions** | **68% Gemma, 18% Claude sonnet, 14% Claude opus** |
