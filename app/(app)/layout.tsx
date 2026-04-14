@@ -17,9 +17,14 @@ export default async function AppLayout({
     orderBy: { createdAt: "desc" },
   });
 
+  const sharedLists = await db.listMember.findMany({
+    where: { userId: session.user.id },
+    include: { list: { select: { id: true, name: true } } },
+  });
+
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar lists={lists} user={session.user} />
+      <Sidebar lists={lists} sharedLists={sharedLists} user={session.user} />
       <main className="flex-1 overflow-auto p-6">{children}</main>
     </div>
   );

@@ -25,6 +25,11 @@ mock.module("next/cache", () => ({
   revalidatePath: () => {},
 }));
 
+const mockRequireOwner = spyOn({ fn: async () => "user-1" }, "fn");
+mock.module("@/lib/authorization", () => ({
+  requireOwner: (...args: unknown[]) => mockRequireOwner(...args),
+}));
+
 const { createList, renameList, deleteList } = await import("./lists");
 
 describe("createList", () => {
@@ -53,19 +58,16 @@ describe("createList", () => {
 
 describe("renameList", () => {
   beforeEach(() => {
-    mockCreate.mockReset();
-    mockFindUnique.mockReset();
+    mockRequireOwner.mockReset().mockResolvedValue("user-1");
     mockUpdate.mockReset();
-    mockDelete.mockReset();
   });
 
-  it("throws Not found if list belongs to another user", async () => {
-    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "other" });
+  it("throws Not found if not owner", async () => {
+    mockRequireOwner.mockRejectedValue(new Error("Not found"));
     await expect(renameList("l1", "New")).rejects.toThrow("Not found");
   });
 
   it("renames the list", async () => {
-    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "user-1" });
     mockUpdate.mockResolvedValue({ id: "l1", name: "New", ownerId: "user-1" });
     const result = await renameList("l1", "New");
     expect(result.name).toBe("New");
@@ -74,19 +76,16 @@ describe("renameList", () => {
 
 describe("deleteList", () => {
   beforeEach(() => {
-    mockCreate.mockReset();
-    mockFindUnique.mockReset();
-    mockUpdate.mockReset();
+    mockRequireOwner.mockReset().mockResolvedValue("user-1");
     mockDelete.mockReset();
   });
 
-  it("throws Not found if list belongs to another user", async () => {
-    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "other" });
+  it("throws Not found if not owner", async () => {
+    mockRequireOwner.mockRejectedValue(new Error("Not found"));
     await expect(deleteList("l1")).rejects.toThrow("Not found");
   });
 
   it("deletes the list", async () => {
-    mockFindUnique.mockResolvedValue({ id: "l1", ownerId: "user-1" });
     mockDelete.mockResolvedValue({});
     await deleteList("l1");
     expect(mockDelete).toHaveBeenCalledWith({ where: { id: "l1" } });

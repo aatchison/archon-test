@@ -75,8 +75,9 @@ while [ $ATTEMPT -lt $MAX_RETRIES ]; do
 
   if [ $IDLE_COUNT -ge $IDLE_TIMEOUT ] && [ $ATTEMPT -lt $MAX_RETRIES ]; then
     echo ">>> Retrying..." >&2
-    pkill -f 'opencode run' 2>/dev/null || true
-    sleep 2
+    # Kill any child processes of OC_PID (safe — only targets our tree)
+    pkill -P "$OC_PID" 2>/dev/null || true
+    sleep 1
     continue
   fi
 

@@ -1,7 +1,8 @@
 name: watch-pr-review
 description: |
   Watch a PR for review comments, address them, reply, and resolve conversations.
-  Polls every 2 minutes for new comments. For each unresolved comment:
+  Polls every 60 seconds for new comments. Auto-start when moving a PR out of draft.
+  For each unresolved comment:
   1. Read the comment and understand the feedback
   2. Make the requested code change (if applicable)
   3. Reply to the comment explaining what was done
@@ -25,6 +26,19 @@ nodes:
           type: integer
       required: [pr_number]
 
+  - id: check-pr-state
+    bash: |
+      PR=${{ $parse-args.output.pr_number }}
+      STATE=$(gh pr view "$PR" --json state --jq .state 2>/dev/null)
+      echo "state=$STATE"
+      if [ "$STATE" = "MERGED" ] || [ "$STATE" = "CLOSED" ]; then
+        echo "stop=true"
+        echo "reason=PR is $STATE — no need to poll"
+      else
+        echo "stop=false"
+      fi
+    depends_on: [parse-args]
+
   - id: fetch-comments
     bash: |
       PR=${{ $parse-args.output.pr_number }}
@@ -39,7 +53,8 @@ nodes:
       echo "=== PR Reviews ==="
       gh api repos/{owner}/{repo}/pulls/$PR/reviews \
         --jq '.[] | {id: .id, state: .state, body: .body, user: .user.login}' 2>&1
-    depends_on: [parse-args]
+    depends_on: [check-pr-state]
+    when: "$check-pr-state.output.stop != 'true'"
 
   - id: address-comments
     prompt: |
@@ -49,11 +64,12 @@ nodes:
       Comments:
       ${{ $fetch-comments.output }}
 
-      For each unresolved comment:
+      For each unresolved comment that needs a code change or response:
       1. Understand the feedback
       2. If it requires a code change, make the change
-      3. Reply to the comment using: gh api repos/{owner}/{repo}/pulls/$PR/comments/{id}/replies --method POST -f body="..."
-      4. If the comment is on a review, reply appropriately
+      3. Reply and resolve the thread using the helper script:
+         .archon/scripts/resolve-pr-threads.sh <pr_number> <comment_id> "<reply explaining what was done>"
+      4. IMPORTANT: Always resolve after replying. Unresolved threads signal outstanding feedback.
 
       If there are no comments to address, say "No pending comments."
       After addressing all comments, commit any changes and push.
@@ -70,9 +86,12 @@ nodes:
     prompt: |
       Summarize what was done for PR #${{ $parse-args.output.pr_number }}.
 
+      PR state: ${{ $check-pr-state.output }}
       Comments found and addressed:
       ${{ $address-comments.output }}
 
       Be concise — list which comments were addressed and what changes were made.
-    depends_on: [address-comments]
+      If the PR is MERGED or CLOSED, state that polling should stop.
+    depends_on: [address-comments, check-pr-state]
+    trigger_rule: all_done
     allowed_tools: []

@@ -30,6 +30,17 @@ export default async function ListSettingsPage({
       <div className="bg-white rounded-lg border divide-y">
         <div className="p-6">
           <h2 className="text-sm font-medium text-gray-700 mb-3">
+            Collaboration
+          </h2>
+          <Link
+            href={`/lists/${list.id}/members`}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Manage members
+          </Link>
+        </div>
+        <div className="p-6">
+          <h2 className="text-sm font-medium text-gray-700 mb-3">
             Rename list
           </h2>
           <form

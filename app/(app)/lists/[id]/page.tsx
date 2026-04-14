@@ -6,6 +6,7 @@ import TaskItem from "@/components/task-item";
 import TaskForm from "@/components/task-form";
 import { buildTaskWhere } from "@/lib/filters";
 import { TaskFilters } from "@/components/task-filters";
+import { canView, canEdit } from "@/lib/authorization";
 
 export default async function ListPage({
   params,
@@ -32,6 +33,9 @@ export default async function ListPage({
 
   const where = buildTaskWhere(id, { priority, label, due, status });
 
+  if (!(await canView(id))) notFound();
+  const userCanEdit = await canEdit(id);
+
   const list = await db.list.findUnique({
     where: { id },
     include: {
@@ -43,7 +47,7 @@ export default async function ListPage({
     },
   });
 
-  if (!list || list.ownerId !== session.user.id) notFound();
+  if (!list) notFound();
 
   type TaskWithList = (typeof list.tasks)[number];
   const pending = list.tasks.filter((t: TaskWithList) => !t.done);
@@ -68,13 +72,14 @@ export default async function ListPage({
           status,
         }}
       />
-      <TaskForm listId={list.id} />
+      {userCanEdit && <TaskForm listId={list.id} />}
       <div className="mt-4 space-y-1">
         {pending.map((task: TaskWithList) => (
           <TaskItem
             key={task.id}
             task={{ ...task, labels: task.labels.map((tl) => tl.label) }}
             allLabels={allLabels}
+            canEdit={userCanEdit}
           />
         ))}
         {done.length > 0 && (
@@ -86,6 +91,7 @@ export default async function ListPage({
                 key={task.id}
                 task={{ ...task, labels: task.labels.map((tl) => tl.label) }}
                 allLabels={allLabels}
+                canEdit={userCanEdit}
               />
             ))}
           </>

@@ -3,9 +3,11 @@ import { signOut } from "@/lib/auth";
 
 export default function Sidebar({
   lists,
+  sharedLists,
   user,
 }: {
   lists: { id: string; name: string }[];
+  sharedLists: { list: { id: string; name: string } }[];
   user: { name?: string | null; email?: string | null };
 }) {
   return (
@@ -23,6 +25,24 @@ export default function Sidebar({
             <p className="text-sm text-gray-500">No lists yet</p>
           ) : (
             lists.map((list) => (
+              <Link
+                key={list.id}
+                href={`/lists/${list.id}`}
+                className="block p-2 hover:bg-gray-200 rounded text-sm"
+              >
+                {list.name}
+              </Link>
+            ))
+          )}
+        </div>
+        <div className="pt-4 space-y-1">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2">
+            Shared with me
+          </p>
+          {sharedLists.length === 0 ? (
+            <p className="text-sm text-gray-500 px-2">None</p>
+          ) : (
+            sharedLists.map(({ list }) => (
               <Link
                 key={list.id}
                 href={`/lists/${list.id}`}

@@ -10,97 +10,97 @@ nodes:
     bash: |
       PR="${ARGUMENTS:-$(gh pr view --json number --jq .number 2>/dev/null)}"
       echo "pr_number=$PR"
-      gh pr diff "$PR" 2>/dev/null | head -2000
+      DIFF_FILE=$(mktemp /tmp/pr-diff-XXXXXX.txt)
+      gh pr diff "$PR" 2>/dev/null | head -2000 > "$DIFF_FILE"
+      echo "diff_file=$DIFF_FILE"
+      echo "diff_lines=$(wc -l < "$DIFF_FILE")"
 
   - id: security-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are a SECURITY reviewer. Review this code diff for: injection vulnerabilities, auth bypass, data leaks, secret exposure, CSRF, insecure defaults. Only report real issues with file:line references. Be concise.
-
-${{ $get-diff.output }}"
+        "You are a SECURITY reviewer. Review this code diff for: injection vulnerabilities, auth bypass, data leaks, secret exposure, CSRF, insecure defaults. Only report real issues with file:line references. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: simplicity-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are a SIMPLICITY reviewer. Review this code diff for: unnecessary complexity, over-engineering, abstractions that could be simpler, dead code, premature optimization. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are a SIMPLICITY reviewer. Review this code diff for: unnecessary complexity, over-engineering, abstractions that could be simpler, dead code, premature optimization. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: performance-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are a PERFORMANCE reviewer. Review this code diff for: N+1 queries, missing indexes, unnecessary re-renders, large bundle imports, inefficient algorithms, memory leaks. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are a PERFORMANCE reviewer. Review this code diff for: N+1 queries, missing indexes, unnecessary re-renders, large bundle imports, inefficient algorithms, memory leaks. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: accessibility-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are an ACCESSIBILITY reviewer. Review this code diff for: missing ARIA labels, keyboard navigation gaps, color contrast issues, missing form labels, screen reader compatibility. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are an ACCESSIBILITY reviewer. Review this code diff for: missing ARIA labels, keyboard navigation gaps, color contrast issues, missing form labels, screen reader compatibility. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: error-handling-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are an ERROR HANDLING reviewer. Review this code diff for: unhandled promise rejections, missing try/catch, silent failures, poor error messages, missing validation, race conditions. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are an ERROR HANDLING reviewer. Review this code diff for: unhandled promise rejections, missing try/catch, silent failures, poor error messages, missing validation, race conditions. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: testing-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are a TESTING reviewer. Review this code diff for: missing test coverage, tests that don't actually test behavior, brittle tests, missing edge cases, tests that would pass even if the code was broken. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are a TESTING reviewer. Review this code diff for: missing test coverage, tests that don't actually test behavior, brittle tests, missing edge cases, tests that would pass even if the code was broken. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: naming-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are a NAMING & READABILITY reviewer. Review this code diff for: misleading variable/function names, unclear abbreviations, inconsistent naming conventions, confusing code flow, missing comments on non-obvious logic. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are a NAMING & READABILITY reviewer. Review this code diff for: misleading variable/function names, unclear abbreviations, inconsistent naming conventions, confusing code flow, missing comments on non-obvious logic. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: type-safety-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are a TYPE SAFETY reviewer. Review this code diff for: any/unknown types that should be specific, type assertions that hide bugs, missing null checks, implicit type coercions, interface mismatches between components. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are a TYPE SAFETY reviewer. Review this code diff for: any/unknown types that should be specific, type assertions that hide bugs, missing null checks, implicit type coercions, interface mismatches between components. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: api-design-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are an API DESIGN reviewer. Review this code diff for: inconsistent function signatures, unclear return types, breaking changes, missing input validation at boundaries, leaky abstractions, confusing prop interfaces. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are an API DESIGN reviewer. Review this code diff for: inconsistent function signatures, unclear return types, breaking changes, missing input validation at boundaries, leaky abstractions, confusing prop interfaces. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
 
   - id: maintainability-review
     bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
       .archon/scripts/run-opencode.sh vllm-31b/google/gemma-4-31B-it 180 1 \
-        "You are a MAINTAINABILITY reviewer. Review this code diff for: tight coupling between modules, files doing too much, unclear dependencies, magic numbers/strings, code that will be hard to modify later, missing documentation for complex logic. Only report real issues. Be concise.
-
-${{ $get-diff.output }}"
+        "You are a MAINTAINABILITY reviewer. Review this code diff for: tight coupling between modules, files doing too much, unclear dependencies, magic numbers/strings, code that will be hard to modify later, missing documentation for complex logic. Only report real issues. Be concise. $(cat "$DIFF_FILE" 2>/dev/null | head -2000)"
     depends_on: [get-diff]
-    timeout: 120000
+    timeout: 240000
+
+  - id: cleanup
+    bash: |
+      DIFF_FILE=$(echo '${{ $get-diff.output }}' | grep '^diff_file=' | cut -d= -f2)
+      rm -f "$DIFF_FILE"
+    depends_on: [security-review, simplicity-review, performance-review, accessibility-review, error-handling-review, testing-review, naming-review, type-safety-review, api-design-review, maintainability-review]
+    trigger_rule: all_done
 
   - id: summarize
     prompt: |
@@ -119,6 +119,5 @@ ${{ $get-diff.output }}"
 
       Format as a table: | Perspective | Issues Found | Severity | Details |
       Deduplicate findings across perspectives. Only include actual issues, not praise.
-    depends_on: [security-review, simplicity-review, performance-review, accessibility-review, error-handling-review, testing-review, naming-review, type-safety-review, api-design-review, maintainability-review]
-    trigger_rule: all_done
+    depends_on: [cleanup]
     allowed_tools: []
