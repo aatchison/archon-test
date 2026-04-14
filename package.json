@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "test": "bun test lib/password.test.ts lib/filters.test.ts actions/lists.test.ts actions/tasks.test.ts actions/labels.test.ts components/list-card.test.tsx components/task-item.test.tsx components/label-badge.test.tsx",
+    "test": "bun test lib/password.test.ts lib/filters.test.ts lib/dates.test.ts actions/lists.test.ts actions/tasks.test.ts actions/labels.test.ts components/list-card.test.tsx components/task-item.test.tsx components/label-badge.test.tsx",
     "test:watch": "bun test --watch",
     "test:integration": "INTEGRATION_TEST=1 DATABASE_URL=file:test.db bun test actions/*.integration.test.ts",
     "test:all": "bun run test && bun run test:integration"

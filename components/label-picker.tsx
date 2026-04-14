@@ -65,6 +65,7 @@ export function LabelPicker({
                 key={label.id}
                 type="button"
                 onClick={() => toggleLabel(label.id)}
+                aria-pressed={selectedIds.includes(label.id)}
                 className="flex items-center gap-2 px-2 py-1.5 text-sm text-left hover:bg-gray-100 rounded"
               >
                 <div

@@ -114,14 +114,20 @@ export async function removeLabelFromTask(taskId: string, labelId: string) {
     throw new Error("Unauthorized");
   }
 
-  await db.taskLabel.delete({
-    where: {
-      taskId_labelId: {
-        taskId,
-        labelId,
+  try {
+    await db.taskLabel.delete({
+      where: {
+        taskId_labelId: {
+          taskId,
+          labelId,
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    const prismaError = error as { code?: string };
+    if (prismaError.code !== "P2025") throw error;
+    // Already removed — idempotent
+  }
 
   revalidatePath(`/lists/${task.listId}`);
 }
