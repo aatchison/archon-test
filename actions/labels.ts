@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireEdit } from "@/lib/authorization";
 
 async function getSession() {
   const session = await auth();
@@ -76,9 +77,8 @@ export async function addLabelToTask(taskId: string, labelId: string) {
   });
   const label = await db.label.findUnique({ where: { id: labelId } });
 
-  if (!task || !task.list || task.list.ownerId !== session.user.id) {
-    throw new Error("Unauthorized");
-  }
+  if (!task) throw new Error("Not found");
+  await requireEdit(task.listId);
   if (!label || label.userId !== session.user.id) {
     throw new Error("Unauthorized");
   }
@@ -113,9 +113,8 @@ export async function removeLabelFromTask(taskId: string, labelId: string) {
     include: { list: true },
   });
 
-  if (!task || !task.list || task.list.ownerId !== session.user.id) {
-    throw new Error("Unauthorized");
-  }
+  if (!task) throw new Error("Not found");
+  await requireEdit(task.listId);
 
   try {
     await db.taskLabel.delete({
