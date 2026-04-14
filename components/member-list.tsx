@@ -1,0 +1,62 @@
+"use client";
+
+import { RoleBadge } from "./role-badge";
+import { updateMemberRole, removeMember } from "@/actions/members";
+
+export function MemberList({
+  members,
+  listId,
+  isOwner,
+}: {
+  members: Array<{
+    user: { id: string; name: string; email: string };
+    role: string;
+    listId: string;
+    userId: string;
+  }>;
+  listId: string;
+  isOwner: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      {members.map((member) => (
+        <div
+          key={member.userId}
+          className="flex items-center justify-between p-2 border rounded"
+        >
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="text-sm font-medium">{member.user.name}</p>
+              <p className="text-xs text-gray-500">{member.user.email}</p>
+            </div>
+            <RoleBadge role={member.role} />
+          </div>
+
+          {isOwner && member.role !== "OWNER" && (
+            <div className="flex items-center gap-2">
+              <select
+                value={member.role}
+                onChange={async (e) => {
+                  await updateMemberRole(listId, member.userId, e.target.value);
+                }}
+                className="border rounded px-1 py-1 text-xs"
+              >
+                <option value="EDITOR">Editor</option>
+                <option value="VIEWER">Viewer</option>
+              </select>
+              <button
+                type="button"
+                onClick={async () => {
+                  await removeMember(listId, member.userId);
+                }}
+                className="text-red-600 text-xs font-medium hover:underline"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
