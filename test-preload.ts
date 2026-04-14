@@ -73,4 +73,15 @@ if (!process.env.INTEGRATION_TEST) {
       }
     },
   }));
+
+  mock.module("@/lib/realtime-config", () => ({
+    REALTIME_CONFIG: {
+      keepaliveIntervalMs: 30000,
+      presenceTimeoutMs: 60000,
+      reconnectBaseMs: 1000,
+      reconnectMaxMs: 30000,
+      deduplicationSetSize: 200,
+      maxConnectionsPerUserPerList: 5,
+    },
+  }));
 }
