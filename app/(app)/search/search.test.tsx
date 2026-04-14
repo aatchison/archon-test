@@ -2,6 +2,13 @@
 import { mock, describe, it, expect, afterEach } from "bun:test";
 import { render, screen, cleanup } from "@testing-library/react";
 
+mock.module("@/lib/auth", () => ({
+  auth: async () => ({ user: { id: "test-user" } }),
+  getUserId: async () => "test-user",
+  signIn: async () => {},
+  signOut: async () => {},
+}));
+
 const mockSearchTasks = mock(async () => ({ tasks: [], total: 0 }));
 mock.module("@/actions/search", () => ({
   searchTasks: (...args: any[]) => mockSearchTasks(...args),

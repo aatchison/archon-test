@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { describe, it, expect, beforeAll, afterAll } from "bun:test";
+import { describe, it, expect, beforeAll, afterAll, mock } from "bun:test";
 import { PrismaClient } from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { execFileSync } from "child_process";
@@ -14,9 +14,18 @@ import {
 const TEST_DB_URL = "file:test-search.db";
 process.env.DATABASE_URL = TEST_DB_URL;
 
+// Mock auth to return a test user
+mock.module("@/lib/auth", () => ({
+  auth: async () => ({ user: { id: "search-user-a" } }),
+}));
+mock.module("next/cache", () => ({ revalidatePath: () => {} }));
+
 // Create a test-specific Prisma client
 const adapter = new PrismaLibSql({ url: TEST_DB_URL });
 const testDb = new PrismaClient({ adapter });
+
+// Override the db module to use test database
+mock.module("@/lib/db", () => ({ db: testDb }));
 
 // Test data IDs
 const USER_A = "search-user-a";
