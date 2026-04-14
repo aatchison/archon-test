@@ -1,0 +1,69 @@
+name: recall-workflows
+description: |
+  Recall all available Archon workflows, scripts, and process conventions at the start of a new task.
+  Loads workflow descriptions, memory index, and project conventions so nothing is rediscovered.
+  Run this at the beginning of every new task or feature.
+  Triggers: "recall workflows", "what workflows do we have", "start new task", "task setup"
+
+nodes:
+  - id: list-workflows
+    bash: |
+      echo "=== Available Archon Workflows ==="
+      for f in .archon/workflows/*.yaml; do
+        NAME=$(grep '^name:' "$f" | head -1 | sed 's/^name: *//')
+        DESC=$(sed -n '/^description:/,/^[^ ]/p' "$f" | head -5 | tail -4 | sed 's/^  //')
+        TRIGGERS=$(grep -i 'triggers:' "$f" | head -1 | sed 's/.*Triggers: *//')
+        echo ""
+        echo "## $NAME"
+        echo "$DESC"
+        [ -n "$TRIGGERS" ] && echo "Triggers: $TRIGGERS"
+      done
+
+  - id: list-scripts
+    bash: |
+      echo "=== Available Scripts ==="
+      for f in .archon/scripts/*; do
+        NAME=$(basename "$f")
+        USAGE=$(head -5 "$f" | grep -i 'usage:' | head -1 | sed 's/^# *//')
+        DESC=$(head -5 "$f" | grep -v '^#!' | grep '^#' | head -1 | sed 's/^# *//')
+        echo ""
+        echo "## $NAME"
+        [ -n "$DESC" ] && echo "$DESC"
+        [ -n "$USAGE" ] && echo "$USAGE"
+      done
+
+  - id: load-conventions
+    bash: |
+      echo "=== Project Conventions (from CLAUDE.md) ==="
+      if [ -f CLAUDE.md ]; then
+        # Extract the Conventions section
+        sed -n '/^## Conventions/,/^## /p' CLAUDE.md | head -20
+      fi
+      echo ""
+      echo "=== Memory Index ==="
+      MEMORY_DIR=$(find ~/.claude/projects -name MEMORY.md -path "*archon-test*" 2>/dev/null | head -1)
+      if [ -n "$MEMORY_DIR" ]; then
+        cat "$MEMORY_DIR"
+      else
+        echo "No memory index found"
+      fi
+
+  - id: summarize
+    prompt: |
+      Present a concise briefing for starting a new task. Organize the information below into a clear reference card.
+
+      ${{ $list-workflows.output }}
+
+      ${{ $list-scripts.output }}
+
+      ${{ $load-conventions.output }}
+
+      Format as:
+      1. **Workflows** — table with Name | Purpose | When to Use
+      2. **Scripts** — table with Name | Purpose | Usage
+      3. **Key Conventions** — bullet list of the most important process rules
+      4. **Memory Highlights** — most relevant remembered preferences and patterns
+
+      Be concise. This is a quick-reference card, not documentation.
+    depends_on: [list-workflows, list-scripts, load-conventions]
+    allowed_tools: []
