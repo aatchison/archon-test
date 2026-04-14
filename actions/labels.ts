@@ -91,8 +91,11 @@ export async function addLabelToTask(taskId: string, labelId: string) {
       },
     });
   } catch (error: unknown) {
-    const prismaError = error as { code?: string };
-    if (prismaError.code === "P2002") {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as any).code === "P2002"
+    ) {
       // Already exists — idempotent, return silently
       return;
     }
@@ -124,8 +127,14 @@ export async function removeLabelFromTask(taskId: string, labelId: string) {
       },
     });
   } catch (error) {
-    const prismaError = error as { code?: string };
-    if (prismaError.code !== "P2025") throw error;
+    if (
+      !(
+        error instanceof Error &&
+        "code" in error &&
+        (error as any).code === "P2025"
+      )
+    )
+      throw error;
     // Already removed — idempotent
   }
 

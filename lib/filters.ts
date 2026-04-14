@@ -1,4 +1,4 @@
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+import { MS_PER_DAY } from "./dates";
 
 export function buildTaskWhere(
   listId: string,

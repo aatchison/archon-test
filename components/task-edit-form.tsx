@@ -42,7 +42,10 @@ export function TaskEditForm({ task, allLabels, onClose }: TaskEditFormProps) {
         title,
         description,
         priority,
-        dueDate: dueDate ? new Date(dueDate) : undefined,
+        dueDate:
+          dueDate && !isNaN(new Date(dueDate).getTime())
+            ? new Date(dueDate)
+            : undefined,
       });
 
       const currentLabelIds = task.labels.map((l) => l.labelId);

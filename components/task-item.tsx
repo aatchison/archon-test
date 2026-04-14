@@ -71,7 +71,7 @@ export default function TaskItem({ task, allLabels }: TaskItemProps) {
             </span>
           )}
           <div className="flex gap-1">
-            {task.labels?.map((label) => (
+            {task.labels.map((label) => (
               <LabelBadge
                 key={label.id}
                 name={label.name}

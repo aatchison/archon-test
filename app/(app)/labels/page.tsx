@@ -49,6 +49,7 @@ export default async function LabelsPage() {
               <button
                 className="text-sm text-red-600 hover:text-red-800 font-medium"
                 type="submit"
+                aria-label={`Delete ${label.name}`}
               >
                 Delete
               </button>

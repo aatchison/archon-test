@@ -58,14 +58,18 @@ export function LabelPicker({
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-48 bg-white border rounded-md shadow-lg p-2">
+        <div
+          className="absolute z-10 mt-1 w-48 bg-white border rounded-md shadow-lg p-2"
+          role="listbox"
+        >
           <div className="flex flex-col gap-1">
             {labels.map((label) => (
               <button
                 key={label.id}
                 type="button"
+                role="option"
                 onClick={() => toggleLabel(label.id)}
-                aria-pressed={selectedIds.includes(label.id)}
+                aria-selected={selectedIds.includes(label.id)}
                 className="flex items-center gap-2 px-2 py-1.5 text-sm text-left hover:bg-gray-100 rounded"
               >
                 <div

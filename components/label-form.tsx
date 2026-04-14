@@ -50,10 +50,10 @@ export function LabelForm({ label, onDone }: LabelFormProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Color</span>
+      <fieldset className="flex flex-col gap-1">
+        <legend className="text-sm font-medium">Color</legend>
         <ColorPicker selected={color} onSelect={setColor} />
-      </div>
+      </fieldset>
 
       <div className="flex gap-2 justify-end">
         <button
