@@ -135,6 +135,7 @@ export default function TaskItem({
           <button
             type="button"
             onClick={handleDelete}
+            aria-label={`Delete task ${task.title}`}
             className="text-red-500 hover:text-red-700"
           >
             Delete
