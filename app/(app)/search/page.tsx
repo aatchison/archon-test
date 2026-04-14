@@ -10,10 +10,13 @@ export default async function SearchPage({
   const params = await searchParams;
   const query = params.q ?? "";
   const page = Number(params.page ?? "1");
+  const rawStatus = params.status;
+  const status: "active" | "completed" | undefined =
+    rawStatus === "active" || rawStatus === "completed" ? rawStatus : undefined;
   const filters = {
     listId: params.listId,
     priority: params.priority,
-    status: params.status as "active" | "completed" | undefined,
+    status,
   };
 
   if (!query.trim()) {

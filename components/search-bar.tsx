@@ -19,10 +19,14 @@ export function SearchBar() {
       setSuggestions([]);
       return;
     }
-    const results = await getSearchSuggestions(q);
-    setSuggestions(results);
-    setShowSuggestions(true);
-    setSelectedIndex(-1);
+    try {
+      const results = await getSearchSuggestions(q);
+      setSuggestions(results);
+      setShowSuggestions(true);
+      setSelectedIndex(-1);
+    } catch {
+      setSuggestions([]);
+    }
   }, []);
 
   const handleChange = (value: string) => {

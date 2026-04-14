@@ -129,7 +129,7 @@ export async function searchTasks(
     "SELECT COUNT(*) as cnt " + baseQuery,
     ...baseParams,
   );
-  const total = Number(countResult[0]?.cnt ?? 0);
+  const total = Number(countResult[0]?.cnt ?? 0) || 0;
   if (total === 0) return { tasks: [], total: 0 };
   const rows = await prisma.$queryRawUnsafe<
     Array<{
