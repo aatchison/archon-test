@@ -1,11 +1,9 @@
 // @ts-nocheck
 import { describe, it, expect, beforeEach, mock } from "bun:test";
-import {
-  sanitizeQuery,
-  searchTasks,
-  getSearchSuggestions,
-  rebuildSearchIndex,
-} from "./search";
+
+// Use dynamic import to get the real module even when other test files mock @/lib/search
+const searchModule = await import("./search");
+const { sanitizeQuery, searchTasks, getSearchSuggestions, rebuildSearchIndex } = searchModule;
 
 describe("sanitizeQuery", () => {
   it("returns empty string for empty input", () => {
@@ -46,7 +44,7 @@ describe("searchTasks", () => {
     const calls: any[][] = [];
     const queryRaw = (...args: any[]) => {
       calls.push(args);
-      return Promise.resolve([{ cnt: 0 }]);
+      return Promise.resolve([{ cnt: 1 }]);
     };
     const prisma = { $queryRawUnsafe: queryRaw };
     await searchTasks(prisma as any, "user1", "test");
